@@ -13,6 +13,7 @@
 //at any of a predefined set of locations. 
 //An alternative to the traditional Yacc prologue, %{code%}.
 %code requires {
+  #include <memory>
   #include <string>
   class cat_driver;
 }
@@ -96,8 +97,8 @@
 %left UMINUS
 
 //TODO set the type of nonterminal
-%type  <int> exp
-
+%type <A_exp*> exp
+%type <A_var*> lvalue 
 //TODO: %printer { code } symbols
 %printer { yyoutput << $$; } <*>;
 
@@ -116,7 +117,6 @@ exp:
   | seq
   | INT
   | STRING
-  | "let" decs "in" explist "end"
   | exp "+" exp 
   | exp "-" exp 
   | exp "*" exp 
@@ -129,13 +129,14 @@ exp:
   | exp ">=" exp
   | exp "&" exp
   | exp "|" exp
-  | "-" exp %prec UMINUS 
+  | "-" exp %prec UMINUS //---------
   | record
   | array
   | "if" exp "then" exp "else" exp 
   | "while" exp "do" exp 
   | "for" id ":=" exp "to" exp "do" exp 
   | "break" 
+  | "let" decs "in" explist "end"
 ;
 seq: 
     "(" explist ")"
@@ -187,7 +188,7 @@ explist:
 	| %empty
 ;
 lvalue: 
-    id /*{F("");}*/
+    id 
   | lvalue "." id 
   | lvalue "[" exp "]" 
 ;

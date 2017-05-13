@@ -2,7 +2,7 @@
 #define CAT_DRIVER
 
 #include <string>
-#include <map>
+#include <memory>
 #include "cat.tab.hh"
 
 class cat_driver;
@@ -14,27 +14,23 @@ YY_DECL;
 
 class cat_driver{
 public:
-  cat_driver();
-  virtual ~cat_driver();
-  
-  std::map<std::string,int>  int_var;
-  std::map<std::string,string> string_var;
-  int result;
-
-  // Handling the scanner.
-  void scan_begin();
-  void scan_end();
-  bool trace_scanning;
-
-  // Run the parser on file f.
-  // Return 0 on success.
-  int parse (const std::string& f);
   // The name of the file being parsed.
   // Used later to pass the file name to the location tracker.
   std::string file;
+  std::unique_ptr<A_exp> ast_root;
   // Whether parser traces should be generated.
+  bool trace_scanning;
   bool trace_parsing;
 
+  //-------------------------------------------------------
+  cat_driver();
+  virtual ~cat_driver();
+  // Handling the scanner.
+  void scan_begin();
+  void scan_end();
+  // Run the parser on file f.
+  // Return 0 on success.
+  void parse (const std::string& f);
   // Error handling.
   void error (const yy::location& loc, const std::string& msg);
   void error (const std::string& msg);
