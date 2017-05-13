@@ -28,7 +28,7 @@
 };
 
 //enable parser tracing
-%define parse.trace
+//%define parse.trace
 //enable verbose error messages
 %define parse.error verbose
 
@@ -105,8 +105,8 @@
 %type <A_fieldList*> typefields
 %type <A_expList*> explist args
 
-//TODO: %printer { code } symbols
-%printer { yyoutput << $$; } <*>;
+//%printer { code } symbols
+//%printer { yyoutput << $$; } <*>;
 
 %%
 %start code;

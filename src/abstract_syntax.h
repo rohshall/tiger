@@ -128,8 +128,7 @@ struct A_recordExp : A_exp {
 struct A_arrayExp : A_exp {
   std::string id;
   std::unique_ptr<A_exp> size, init;
-  A_arrayExp(const yy::location& _loc, const std::string& _id, A_exp* size,
-             A_exp* _init);
+  A_arrayExp(const yy::location& _loc, const std::string& _id, A_exp* size,A_exp* _init);
 };
 // if
 struct A_ifExp : A_exp {
@@ -156,7 +155,7 @@ struct A_breakExp : A_exp {
 struct A_letExp : A_exp {
   std::unique_ptr<A_decList> decs;
   std::unique_ptr<A_exp> body;
-  A_letExp(const yy::location& _loc, A_decList* _decs, A_exp* _body)
+  A_letExp(const yy::location& _loc, A_decList* _decs, A_exp* _body);
 };
 
 /*
