@@ -96,112 +96,119 @@
 %left TIMES DIVIDE
 %left UMINUS
 
-//TODO set the type of nonterminal
-%type <A_exp*> exp
+%type <A_exp*> exp seq funcall record array
 %type <A_var*> lvalue 
+%type <A_efieldList*> refields
+%type <A_decList*> decs
+%type <A_dec*> dec tydec vardec fundec
+%type <A_Ty*> ty id
+%type <A_fieldList*> typefields
+%type <A_expList*> explist args
+
 //TODO: %printer { code } symbols
 %printer { yyoutput << $$; } <*>;
 
 %%
 %start code;
 code: 
-  %empty 
-  | exp 
+  %empty  { /*the unique_ptr is nulllptr by default.*/ }
+  | exp   { driver.ast.reset(new A_Program(@1,$1)); }
 ;
 
 exp:  
-    lvalue 
-  | funcall 
-  | lvalue ":=" exp 
-  | NIL 
-  | seq
-  | INT
-  | STRING
-  | exp "+" exp 
-  | exp "-" exp 
-  | exp "*" exp 
-  | exp "/" exp 
-  | exp "=" exp
-  | exp "<>" exp
-  | exp "<" exp
-  | exp "<=" exp
-  | exp ">" exp
-  | exp ">=" exp
-  | exp "&" exp
-  | exp "|" exp
-  | "-" exp %prec UMINUS //---------
-  | record
-  | array
-  | "if" exp "then" exp "else" exp 
-  | "while" exp "do" exp 
-  | "for" id ":=" exp "to" exp "do" exp 
-  | "break" 
-  | "let" decs "in" explist "end"
+    lvalue                { $$ = new A_varExp(@1,$1); }
+  | funcall               { $$ = $1; }
+  | lvalue ":=" exp       { $$ = new A_assignExp(@1,$1,$3); }
+  | NIL                   { $$ = new A_nilExp(@1,); }
+  | seq                   { $$ = $1; }
+  | INT                   { $$ = new A_intExp(@1,$1); }
+  | STRING                { $$ = new A_stringExp(@1,$1); }
+  | exp "+" exp           { $$ = new A_opExp(@1,A_oper::plus,$1,$3); }
+  | exp "-" exp           { $$ = new A_opExp(@1,A_oper::minus,$1,$3); }
+  | exp "*" exp           { $$ = new A_opExp(@1,A_oper::times,$1,$3); }
+  | exp "/" exp           { $$ = new A_opExp(@1,A_oper::divide,$1,$3); }
+  | exp "=" exp           { $$ = new A_opExp(@1,A_oper::eq,$1,$3); }
+  | exp "<>" exp          { $$ = new A_opExp(@1,A_oper::neq,$1,$3); }
+  | exp "<" exp           { $$ = new A_opExp(@1,A_oper::lt,$1,$3); }
+  | exp "<=" exp          { $$ = new A_opExp(@1,A_oper::le,$1,$3); }
+  | exp ">" exp           { $$ = new A_opExp(@1,A_oper::gt,$1,$3); }
+  | exp ">=" exp          { $$ = new A_opExp(@1,A_oper::ge,$1,$3); }
+  | exp "&" exp           { $$ = new A_opExp(@1,A_oper::and,$1,$3); }
+  | exp "|" exp           { $$ = new A_opExp(@1,A_oper::or,$1,$3); }
+  | "-" exp %prec UMINUS  { $$ = new A_opExp(@1,A_oper::minus,new A_intExp(@1,0),$2); }
+  | record                { $$ = $1; }
+  | array                 { $$ = $1; }
+  | "if" exp "then" exp "else" exp      { $$ = new A_ifExp(@1,$2,$4,$6); }
+  | "if" exp "then" exp                 { $$ = new A_ifExp(@1,$2,$4); }
+  | "while" exp "do" exp                { $$ = new A_whileExp(@1,$2,$4); }
+  | "for" id ":=" exp "to" exp "do" exp { $$ = new forExp(@1,$2,$4,$6); }
+  | "break"                             { $$ = new A_breakExp(@1); }
+  | "let" decs "in" explist "end"       { $$ = new A_letExp(@1,$2,$4); }
 ;
 seq: 
-    "(" explist ")"
+    "(" explist ")" { $$ = new A_seqExp(@1,$2); }
 ;
 record: 
-    id "{" refields "}"
+    id "{" refields "}" { $$ = new A_recordExp(@1,$1,$3); }
 ;
 refields: 
-    id "=" exp "," refields
-  | id "=" exp
-  | %empty
+    id "=" exp "," refields { $$ = new A_efieldList(@1,new A_efield(@1,$1,$3),$5); }
+  | id "=" exp              { $$ = new A_efieldList(@1,new A_efield(@1,$1,$3),nullptr); }
+  | %empty                  { /*do nothing*/ }
 ;
 array: 
-    id "[" exp "]" "of" exp 
+    id "[" exp "]" "of" exp { $$ = new A_arrayExp(@1,$1,$3,$6); }
 ;
 decs: 
-    dec decs
-  | %empty
+    dec decs  { $$ = new A_decList(@1,$1,$2); }
+  | %empty    { $$ = nullptr; }
 ;
 dec: 
-    tydec
-  | vardec
-  | fundec
+    tydec   { $$ = $1; }
+  | vardec  { $$ = $1; }
+  | fundec  { $$ = $1; }
 ;  
 tydec: 
-    "type" id "=" ty
+    "type" id "=" ty { $$ = new A_typeDec(@1,$2,$4); }
 ;
 ty:	
-    id
-  | "{" typefields "}" 
-  | "array" "of" id 
+    id { $$ = $1; }
+  | "{" typefields "}" { $$ = new A_recordTy(@1,$2); }
+  | "array" "of" id  { $$ = new A_arrayTy(@1,$3); }
 ;
 typefields: 
-    id ":" id "," typefields
-  | id ":" id
-	| %empty
+    id ":" id "," typefields { $$ = new A_fieldList(@1,new A_field(@1,$1,$3),$5); }
+  | id ":" id { $$ = new A_fieldList(@1,new A_field(@1,$1,$3),nullptr); }
+	| %empty { $$ = nullptr; }
 ;
 vardec: 
-    "var" id ":=" exp 
-  | "var" id ":" id ":=" exp 
+    "var" id ":=" exp         { $$ = new A_varDec(@1,$2,"",$4); }
+  | "var" id ":" id ":=" exp  { $$ = new A_varDec(@1,$2,$4,$6); }
 ;
 fundec: 
-    "function" id "(" typefields ")" "=" exp
-  | "function" id "(" typefields ")" ":" id "=" exp
+    "function" id "(" typefields ")" "=" exp { $$ = new A_functionDec(@1,$2,$4,"",$7); }
+  | "function" id "(" typefields ")" ":" id "=" exp { $$ = new A_functionDec(@1,$2,$4,$7,$9); }
 ;
 explist: 
-    exp ";" explist
-	| exp
-	| %empty
+    exp ";" explist { $$ = new A_expList(@1,$1,$3); }
+	| exp { $$ = new A_expList(@1,$1,nullptr); }
+	| %empty { $$ = nullptr; }
 ;
 lvalue: 
-    id 
-  | lvalue "." id 
-  | lvalue "[" exp "]" 
+    id { $$ = new A_simpleVar(@1,$1); }
+  | lvalue "." id { $$ = new A_fieldVar(@1,$1,$3); }
+  | lvalue "[" exp "]" { $$ = new A_subscriptVar(@1,$1,$3); }
 ;
 funcall: 
-    id "(" args ")" 
+    id "(" args ")" { $$ = new A_callExp(@1,$1,$3); }
 ;
 args: 
-    exp "," args
-  | exp
-	| %empty
+    exp "," args { $$ = new A_expList(@1,$1,$3); }
+  | exp { $$ = new A_expList(@1,$1,nullptr); }
+	| %empty { $$ = nullptr; }
 ;
 id: 
-    ID 
+    ID { $$ = new A_nameTy(@1,$1); }
 ;  
 %%
 
