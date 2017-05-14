@@ -13,8 +13,7 @@
 static yy::location loc;
 %}
 
-%option noyywrap nounput batch debug noinput  
-
+%option noyywrap nounput batch debug noinput
 
 Id      [a-zA-Z][a-zA-Z_0-9]*
 Int     [0-9]+
@@ -75,6 +74,7 @@ loc.step ();
 "var"       return yy::cat_parser::make_VAR(loc);
 "type"      return yy::cat_parser::make_TYPE(loc); 
 "nil"       return yy::cat_parser::make_NIL(loc);  
+<<EOF>>     return yy::cat_parser::make_EOF(loc);
 
 {Comment} {
   int num = 0;//number of \n
@@ -99,8 +99,12 @@ loc.step ();
   tem[len-1] = tem[len];
   return yy::cat_parser::make_STRING(tem+1,loc);
 }
-{Id}      return yy::cat_parser::make_ID(yytext, loc);    
-.         driver.error (loc, "invalid character");
+{Id} {
+  return yy::cat_parser::make_ID(yytext, loc);    
+}
+.  {
+  driver.error (loc, "invalid character");
+}       
 %%
 
 //Because the scanner-related driver’s member-functions depend on the scanner’s data,

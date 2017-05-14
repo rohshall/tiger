@@ -15,6 +15,7 @@
 %code requires {
   #include <memory>
   #include <string>
+  #include "abstract_syntax.h"
   class cat_driver;
 }
 
@@ -28,12 +29,13 @@
 };
 
 //enable parser tracing
-%define parse.trace
+//%define parse.trace
 //enable verbose error messages
 %define parse.error verbose
 
 //code that is output in the *.cc file
 %code {
+  #include "abstract_syntax.h"
   #include "cat_driver.h"
 }
 
@@ -41,6 +43,7 @@
 //the following line allows for nicer error messages
 %define api.token.prefix {TOK_}
 %token
+  EOF  0  "end of file"
   COMMA     ","
   COLON     ":"
   SEMICOLON ";"
@@ -100,17 +103,18 @@
 %type <A_efieldList*> refields
 %type <A_decList*> decs
 %type <A_dec*> dec tydec vardec fundec
-%type <A_Ty*> ty id
+%type <A_ty*> ty
 %type <A_fieldList*> typefields
 %type <A_expList*> explist args
+%type <std::string> id;
 
 //%printer { code } symbols
-%printer { yyoutput << $$; } <*>;
+//%printer { yyoutput << $$; } <*>;
 
 %%
 %start code;
 code: 
-  %empty  { /*the unique_ptr is nulllptr by default.*/ }
+  %empty  { /*the unique_ptr is nullptr by default.*/ }
   | exp   { driver.ast.reset(new A_Program(@1,$1)); }
 ;
 
@@ -118,29 +122,29 @@ exp:
     lvalue                { $$ = new A_varExp(@1,$1); }
   | funcall               { $$ = $1; }
   | lvalue ":=" exp       { $$ = new A_assignExp(@1,$1,$3); }
-  | NIL                   { $$ = new A_nilExp(@1,); }
+  | NIL                   { $$ = new A_nilExp(@1); }
   | seq                   { $$ = $1; }
   | INT                   { $$ = new A_intExp(@1,$1); }
   | STRING                { $$ = new A_stringExp(@1,$1); }
-  | exp "+" exp           { $$ = new A_opExp(@1,A_oper::plus,$1,$3); }
-  | exp "-" exp           { $$ = new A_opExp(@1,A_oper::minus,$1,$3); }
-  | exp "*" exp           { $$ = new A_opExp(@1,A_oper::times,$1,$3); }
-  | exp "/" exp           { $$ = new A_opExp(@1,A_oper::divide,$1,$3); }
-  | exp "=" exp           { $$ = new A_opExp(@1,A_oper::eq,$1,$3); }
-  | exp "<>" exp          { $$ = new A_opExp(@1,A_oper::neq,$1,$3); }
-  | exp "<" exp           { $$ = new A_opExp(@1,A_oper::lt,$1,$3); }
-  | exp "<=" exp          { $$ = new A_opExp(@1,A_oper::le,$1,$3); }
-  | exp ">" exp           { $$ = new A_opExp(@1,A_oper::gt,$1,$3); }
-  | exp ">=" exp          { $$ = new A_opExp(@1,A_oper::ge,$1,$3); }
-  | exp "&" exp           { $$ = new A_opExp(@1,A_oper::and,$1,$3); }
-  | exp "|" exp           { $$ = new A_opExp(@1,A_oper::or,$1,$3); }
-  | "-" exp %prec UMINUS  { $$ = new A_opExp(@1,A_oper::minus,new A_intExp(@1,0),$2); }
+  | exp "+" exp           { $$ = new A_opExp(@1,A_oper::plusOp,$1,$3); }
+  | exp "-" exp           { $$ = new A_opExp(@1,A_oper::minusOp,$1,$3); }
+  | exp "*" exp           { $$ = new A_opExp(@1,A_oper::timesOp,$1,$3); }
+  | exp "/" exp           { $$ = new A_opExp(@1,A_oper::divideOp,$1,$3); }
+  | exp "=" exp           { $$ = new A_opExp(@1,A_oper::eqOp,$1,$3); }
+  | exp "<>" exp          { $$ = new A_opExp(@1,A_oper::neqOp,$1,$3); }
+  | exp "<" exp           { $$ = new A_opExp(@1,A_oper::ltOp,$1,$3); }
+  | exp "<=" exp          { $$ = new A_opExp(@1,A_oper::leOp,$1,$3); }
+  | exp ">" exp           { $$ = new A_opExp(@1,A_oper::gtOp,$1,$3); }
+  | exp ">=" exp          { $$ = new A_opExp(@1,A_oper::geOp,$1,$3); }
+  | exp "&" exp           { $$ = new A_opExp(@1,A_oper::andOp,$1,$3); }
+  | exp "|" exp           { $$ = new A_opExp(@1,A_oper::orOp,$1,$3); }
+  | "-" exp %prec UMINUS  { $$ = new A_opExp(@1,A_oper::minusOp,new A_intExp(@1,0),$2); }
   | record                { $$ = $1; }
   | array                 { $$ = $1; }
   | "if" exp "then" exp "else" exp      { $$ = new A_ifExp(@1,$2,$4,$6); }
-  | "if" exp "then" exp                 { $$ = new A_ifExp(@1,$2,$4); }
+  | "if" exp "then" exp                 { $$ = new A_ifExp(@1,$2,$4,nullptr); }
   | "while" exp "do" exp                { $$ = new A_whileExp(@1,$2,$4); }
-  | "for" id ":=" exp "to" exp "do" exp { $$ = new forExp(@1,$2,$4,$6); }
+  | "for" id ":=" exp "to" exp "do" exp { $$ = new A_forExp(@1,$2,$4,$6,$8); }
   | "break"                             { $$ = new A_breakExp(@1); }
   | "let" decs "in" explist "end"       { $$ = new A_letExp(@1,$2,$4); }
 ;
@@ -171,7 +175,7 @@ tydec:
     "type" id "=" ty { $$ = new A_typeDec(@1,$2,$4); }
 ;
 ty:  
-    id { $$ = $1; }
+    id { $$ = new A_nameTy(@1,$1); }
   | "{" typefields "}" { $$ = new A_recordTy(@1,$2); }
   | "array" "of" id  { $$ = new A_arrayTy(@1,$3); }
 ;
@@ -206,9 +210,9 @@ args:
   | exp { $$ = new A_expList(@1,$1,nullptr); }
   | %empty { $$ = nullptr; }
 ;
-id: 
-    ID { $$ = new A_nameTy(@1,$1); }
-;  
+id:
+    ID { $$ = $1; }
+;
 %%
 
 void yy::cat_parser::error (const location_type& loc,const std::string& msg){

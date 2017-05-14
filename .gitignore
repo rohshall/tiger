@@ -4,6 +4,7 @@
 #flex/bison generated
 *.hh
 *.cc
+*.c
 
 # Prerequisites
 *.d

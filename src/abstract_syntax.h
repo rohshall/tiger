@@ -1,3 +1,6 @@
+#ifndef ABSTRACT_SYNTAX
+#define ABSTRACT_SYNTAX
+
 #include <cassert>
 #include <memory>
 #include "location.hh"
@@ -8,6 +11,14 @@ struct AstNode {
   AstNode(const yy::location& _loc) : loc(_loc) {}
   virtual ~AstNode() = default;
 };
+
+struct A_exp;
+struct A_ty;
+struct A_fieldList;
+struct A_expList;
+struct A_decList;
+struct A_efieldList;
+
 struct A_Program : AstNode {
   std::unique_ptr<A_exp> exp;
   A_Program(const yy::location& _loc, A_exp* _exp);
@@ -74,7 +85,7 @@ struct A_callExp : A_exp {
 };
 // lvalue ":=" exp
 struct A_assignExp : A_exp {
-  std::unique<A_var> var;
+  std::unique_ptr<A_var> var;
   std::unique_ptr<A_exp> exp;
   A_assignExp(const yy::location& _loc, A_var* _var, A_exp* _exp);
 };
@@ -99,18 +110,18 @@ struct A_stringExp : A_exp {
 };
 // exp op exp
 enum class A_oper {
-  plus,
-  minus,
-  times,
-  divide,
-  eq,
-  neq,
-  lt,
-  le,
-  gt,
-  ge,
-  and,
-  or
+  plusOp,
+  minusOp,
+  timesOp,
+  divideOp,
+  eqOp,
+  neqOp,
+  ltOp,
+  leOp,
+  gtOp,
+  geOp,
+  andOp,
+  orOp
 };
 struct A_opExp : A_exp {
   A_oper op;
@@ -120,15 +131,15 @@ struct A_opExp : A_exp {
 };
 // record
 struct A_recordExp : A_exp {
-  std::string id;
+  std::string type_id;
   std::unique_ptr<A_efieldList> fields;
-  A_recordExp(const yy::location& _loc, const std::string& _id,A_efieldList* _fields);
+  A_recordExp(const yy::location& _loc, const std::string& _typ,A_efieldList* _fields);
 };
 // array
 struct A_arrayExp : A_exp {
-  std::string id;
+  std::string type_id;
   std::unique_ptr<A_exp> size, init;
-  A_arrayExp(const yy::location& _loc, const std::string& _id, A_exp* _size,A_exp* _init);
+  A_arrayExp(const yy::location& _loc, const std::string& _typ, A_exp* _size,A_exp* _init);
 };
 // if
 struct A_ifExp : A_exp {
@@ -142,10 +153,10 @@ struct A_whileExp : A_exp {
 };
 // for
 struct A_forExp : A_exp {
-  std::string id;
+  std::string id; 
   std::unique_ptr<A_exp> low, high, body;
   bool escape;
-  A_forExp(const yy::location& _loc, A_exp* _low, A_exp* _high, A_exp* _body);
+  A_forExp(const yy::location& _loc,const std::string& _id, A_exp* _low, A_exp* _high, A_exp* _body);
 };
 // break
 struct A_breakExp : A_exp {
@@ -154,8 +165,8 @@ struct A_breakExp : A_exp {
 // let
 struct A_letExp : A_exp {
   std::unique_ptr<A_decList> decs;
-  std::unique_ptr<A_exp> body;
-  A_letExp(const yy::location& _loc, A_decList* _decs, A_exp* _body);
+  std::unique_ptr<A_expList> body;
+  A_letExp(const yy::location& _loc, A_decList* _decs, A_expList* _body);
 };
 
 /*
@@ -177,7 +188,7 @@ struct A_varDec : A_dec {
 struct A_typeDec : A_dec {
   std::string type_id;
   std::unique_ptr<A_ty> ty;
-  A_typeDec(const yy::location& _loc, const std::string& _typ, A_ty* _ty)
+  A_typeDec(const yy::location& _loc, const std::string& _typ, A_ty* _ty);
 };
 // fundec
 struct A_functionDec : A_dec {
@@ -185,7 +196,7 @@ struct A_functionDec : A_dec {
   std::unique_ptr<A_fieldList> params;
   std::string type_id;
   std::unique_ptr<A_exp> body;
-  A_functionDec(const yy::location& _loc, const string& _id,A_fieldList* _params, const string& _typ, A_exp* _body);
+  A_functionDec(const yy::location& _loc, const std::string& _id,A_fieldList* _params, const std::string& _typ, A_exp* _body);
 };
 
 /*
@@ -198,12 +209,12 @@ struct A_ty : AstNode {
 // id
 struct A_nameTy : A_ty {
   std::string id;
-  A_nameTy(const yy::location& _loc,const string& _id);
+  A_nameTy(const yy::location& _loc,const std::string& _id);
 };
 // record
 struct A_recordTy : A_ty {
   std::unique_ptr<A_fieldList> record;
-  A_recordTy(const yy::location& _loc,A_recordTy* _record);
+  A_recordTy(const yy::location& _loc,A_fieldList* _record);
 };
 // array
 struct A_arrayTy : A_ty {
@@ -231,7 +242,7 @@ struct A_fieldList : AstNode {
 struct A_expList : AstNode {
   std::unique_ptr<A_exp> head;
   std::unique_ptr<A_expList> tail;
-  A_expList(const yy::location& _loc,A_exp* _head, A_exp* _tail);
+  A_expList(const yy::location& _loc,A_exp* _head, A_expList* _tail);
 };
 
 /*
@@ -246,13 +257,15 @@ struct A_decList : AstNode {
 /*
  * refields
  */
-struct A_efield {
+struct A_efield : AstNode{
   std::string id;
   std::unique_ptr<A_exp> exp;
   A_efield(const yy::location& _loc,const std::string& _id, A_exp* _exp);
 };
-struct A_efieldList {
+struct A_efieldList : AstNode{
   std::unique_ptr<A_efield> head;
   std::unique_ptr<A_efieldList> tail;
   A_efieldList(const yy::location& _loc,A_efield* _head, A_efieldList* _tail);
 };
+
+#endif //ABSTRACT_SYNTAX

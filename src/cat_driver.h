@@ -20,7 +20,6 @@ public:
   std::unique_ptr<A_Program> ast;
   // Whether parser traces should be generated.
   bool trace_scanning;
-  bool trace_parsing;
 
   //-------------------------------------------------------
   cat_driver();

@@ -1,25 +1,15 @@
 DIR_SRC = ./src
 DIR_TAR = ./build
 
-cppfiles := $(wildcard ${DIR_SRC}/*.cpp)  
-hfiles := $(wildcard ${DIR_SRC}/*.h)  
+ccfiles = $(DIR_SRC)/lex.yy.c $(DIR_SRC)/cat.tab.cc
+hhfiles = $(DIR_SRC)/cat.tab.hh $(DIR_SRC)/location.hh $(DIR_SRC)/position.hh $(DIR_SRC)/stack.hh
 
-ccfiles := $(wildcard ${DIR_SRC}/*.cc)
-hhfiles := $(wildcard ${DIR_SRC}/*.hh)
+cppfiles := $(wildcard $(DIR_SRC)/*.cpp)
+hfiles := $(wildcard $(DIR_SRC)/*.h)
 
+$(DIR_TAR)/cat.out: $(cppfiles) $(hfiles) $(hhfiles) $(ccfiles)
+	g++ $(cppfiles) $(ccfiles) -o $@ -std=c++11
 
-${DIR_TAR}/cat.out:
- ${cppfiles} ${hfiles}
-	g++ -std=c++11 -o $@ ${cppfiles}  ${ccfiles}
-
-lex.yy.cc: cat.l
-	flex -+ cat.l
-
-cat.tab.cc cat.tab.hh location.hh position.hh stack.hh: cat.y
-	bison cat.y
-
-.PHONY clean
 clean:
-	rm ${DIR_SRC}/*.hh
-	rm ${DIR_SRC}/*.cc
-	rm ${DIR_TAR}/*
+	rm $(DIR_TAR)/cat.out
+
