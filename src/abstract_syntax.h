@@ -128,7 +128,7 @@ struct A_recordExp : A_exp {
 struct A_arrayExp : A_exp {
   std::string id;
   std::unique_ptr<A_exp> size, init;
-  A_arrayExp(const yy::location& _loc, const std::string& _id, A_exp* size,A_exp* _init);
+  A_arrayExp(const yy::location& _loc, const std::string& _id, A_exp* _size,A_exp* _init);
 };
 // if
 struct A_ifExp : A_exp {
@@ -197,7 +197,7 @@ struct A_ty : AstNode {
 };
 // id
 struct A_nameTy : A_ty {
-  std::string type_id;
+  std::string id;
   A_nameTy(const yy::location& _loc,const string& _id);
 };
 // record
@@ -207,7 +207,7 @@ struct A_recordTy : A_ty {
 };
 // array
 struct A_arrayTy : A_ty {
-  std::string type_id;
+  std::string id;
   A_arrayTy(const yy::location& _loc,const std::string& _id);
 };
 
