@@ -101,7 +101,6 @@ loc.step ();
 }
 {Id}      return yy::cat_parser::make_ID(yytext, loc);    
 .         driver.error (loc, "invalid character");
-<<EOF>>   return yy::cat_parser::make_END(loc);
 %%
 
 //Because the scanner-related driver’s member-functions depend on the scanner’s data,

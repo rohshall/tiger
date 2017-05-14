@@ -28,7 +28,7 @@
 };
 
 //enable parser tracing
-//%define parse.trace
+%define parse.trace
 //enable verbose error messages
 %define parse.error verbose
 
@@ -41,7 +41,6 @@
 //the following line allows for nicer error messages
 %define api.token.prefix {TOK_}
 %token
-  END  0    "end of file"
   COMMA     ","
   COLON     ":"
   SEMICOLON ";"
@@ -106,7 +105,7 @@
 %type <A_expList*> explist args
 
 //%printer { code } symbols
-//%printer { yyoutput << $$; } <*>;
+%printer { yyoutput << $$; } <*>;
 
 %%
 %start code;
@@ -171,7 +170,7 @@ dec:
 tydec: 
     "type" id "=" ty { $$ = new A_typeDec(@1,$2,$4); }
 ;
-ty:	
+ty:  
     id { $$ = $1; }
   | "{" typefields "}" { $$ = new A_recordTy(@1,$2); }
   | "array" "of" id  { $$ = new A_arrayTy(@1,$3); }
@@ -179,7 +178,7 @@ ty:
 typefields: 
     id ":" id "," typefields { $$ = new A_fieldList(@1,new A_field(@1,$1,$3),$5); }
   | id ":" id { $$ = new A_fieldList(@1,new A_field(@1,$1,$3),nullptr); }
-	| %empty { $$ = nullptr; }
+  | %empty { $$ = nullptr; }
 ;
 vardec: 
     "var" id ":=" exp         { $$ = new A_varDec(@1,$2,"",$4); }
@@ -191,8 +190,8 @@ fundec:
 ;
 explist: 
     exp ";" explist { $$ = new A_expList(@1,$1,$3); }
-	| exp { $$ = new A_expList(@1,$1,nullptr); }
-	| %empty { $$ = nullptr; }
+  | exp { $$ = new A_expList(@1,$1,nullptr); }
+  | %empty { $$ = nullptr; }
 ;
 lvalue: 
     id { $$ = new A_simpleVar(@1,$1); }
@@ -205,7 +204,7 @@ funcall:
 args: 
     exp "," args { $$ = new A_expList(@1,$1,$3); }
   | exp { $$ = new A_expList(@1,$1,nullptr); }
-	| %empty { $$ = nullptr; }
+  | %empty { $$ = nullptr; }
 ;
 id: 
     ID { $$ = new A_nameTy(@1,$1); }
