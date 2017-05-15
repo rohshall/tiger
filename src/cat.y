@@ -29,7 +29,7 @@
 };
 
 //enable parser tracing
-//%define parse.trace
+%define parse.trace
 //enable verbose error messages
 %define parse.error verbose
 
@@ -109,7 +109,7 @@
 %type <std::string> id;
 
 //%printer { code } symbols
-//%printer { yyoutput << $$; } <*>;
+%printer { yyoutput << $$; } <*>;
 
 %%
 %start code;

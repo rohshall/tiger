@@ -16,10 +16,10 @@ static yy::location loc;
 %option noyywrap nounput batch debug noinput
 
 Id      [a-zA-Z][a-zA-Z_0-9]*
-Int     [0-9]+
-String  \"[^\n]*\"
+Int     [0-9]+ 
+String  \"([^\\\"\t\r\n]|\\n|\\r|\\t|\\\"|\\\\|\\[0-9]{3,3}|\\[ \t\r\n]*\\)*\"
 Blank   [ \t]
-Comment \/\*(.|\n)*\*\/
+Comment \/\*(([^\*]*(\*[^\/])?)*)\*\/
 %{
 // Code run each time a pattern is matched.
 #define YY_USER_ACTION  loc.columns(yyleng);
@@ -121,3 +121,4 @@ void cat_driver::scan_begin(){
 void cat_driver::scan_end (){
   fclose (yyin);
 }
+
