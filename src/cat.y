@@ -200,6 +200,7 @@ explist:
 lvalue: 
     id { $$ = new A_simpleVar(@1,$1); }
   | lvalue "." id { $$ = new A_fieldVar(@1,$1,$3); }
+  | id "[" exp "]" { $$ = new A_subscriptVar(@1,new A_simpleVar(@1,$1),$3); }
   | lvalue "[" exp "]" { $$ = new A_subscriptVar(@1,$1,$3); }
 ;
 funcall: 
