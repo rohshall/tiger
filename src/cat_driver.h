@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include "symbol_table.h"
 #include "cat.tab.hh"
 
 class cat_driver;
@@ -17,6 +18,9 @@ public:
   // The name of the file being parsed.
   // Used later to pass the file name to the location tracker.
   std::string file;
+  // Type SymbolTable
+  DeclarationTable decTable;
+  // abstract syntax tree root
   std::unique_ptr<A_Program> ast;
   // Whether parser traces should be generated.
   bool trace_scanning;

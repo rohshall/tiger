@@ -1,6 +1,9 @@
 #folders
 .*/
 
+#vscode configure
+.vscode
+
 #flex/bison generated
 *.hh
 *.cc

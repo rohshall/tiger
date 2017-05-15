@@ -182,12 +182,14 @@ struct A_varDec : A_dec {
   std::string type_id;
   std::unique_ptr<A_exp> init;
   bool escape;
+  A_varDec(const std::string& _id,const std::string& _typ, A_exp* _init);
   A_varDec(const yy::location& _loc, const std::string& _id,const std::string& _typ, A_exp* _init);
 };
 // tydec
 struct A_typeDec : A_dec {
   std::string type_id;
   std::unique_ptr<A_ty> ty;
+  A_typeDec(const std::string& _typ, A_ty* _ty);  
   A_typeDec(const yy::location& _loc, const std::string& _typ, A_ty* _ty);
 };
 // fundec
@@ -196,6 +198,7 @@ struct A_functionDec : A_dec {
   std::unique_ptr<A_fieldList> params;
   std::string type_id;
   std::unique_ptr<A_exp> body;
+  A_functionDec(const std::string& _id,A_fieldList* _params, const std::string& _typ, A_exp* _body);  
   A_functionDec(const yy::location& _loc, const std::string& _id,A_fieldList* _params, const std::string& _typ, A_exp* _body);
 };
 
@@ -209,6 +212,7 @@ struct A_ty : AstNode {
 // id
 struct A_nameTy : A_ty {
   std::string id;
+  A_nameTy(const std::string& _id);
   A_nameTy(const yy::location& _loc,const std::string& _id);
 };
 // record
@@ -228,11 +232,13 @@ struct A_arrayTy : A_ty {
 struct A_field : AstNode {
   std::string id, type_id;
   bool escape;
+  A_field(const std::string& _id,const std::string& _typ);
   A_field(const yy::location& _loc,const std::string& _id, const std::string& _typ);
 };
 struct A_fieldList : AstNode {
   std::unique_ptr<A_field> head;
   std::unique_ptr<A_fieldList> tail;
+  A_fieldList(A_field* _head, A_fieldList* _tail);
   A_fieldList(const yy::location& _loc,A_field* _head, A_fieldList* _tail);
 };
 
