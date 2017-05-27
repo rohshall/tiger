@@ -34,9 +34,11 @@ public:
   // Run the parser on file f.
   // Return 0 on success.
   void parse (const std::string& f);
+  // Semantic check
+  void semantic();
   // Error handling.
-  void error (const yy::location& loc, const std::string& msg);
-  void error (const std::string& msg);
+  static void error (const yy::location& loc, const std::string& msg);
+  static void error (const std::string& msg);
 };
 
 

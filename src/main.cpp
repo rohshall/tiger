@@ -15,8 +15,10 @@ int main(int argc, char *argv[]) {
       driver.trace_scanning = true;
     else if(argv[i] == std::string("-p"))
       driver.trace_parsing = true;
-    else
+    else{
       driver.parse(argv[i]);
+      driver.semantic();
+    }
   }
-  std::cout<<"Finish."<<std::endl;  
+  std::cout<<"Compiler Finished."<<std::endl;  
 }

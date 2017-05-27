@@ -1,7 +1,7 @@
 #include "cat_driver.h"
 #include "cat.tab.hh"
 
-cat_driver::cat_driver() : trace_scanning(false),trace_parsing(false) {}
+cat_driver::cat_driver() : trace_scanning(false), trace_parsing(false) {}
 cat_driver::~cat_driver() {}
 
 void cat_driver::parse(const std::string& f) {
@@ -11,6 +11,9 @@ void cat_driver::parse(const std::string& f) {
   parser.set_debug_level(trace_parsing);
   parser.parse();
   scan_end();
+}
+void cat_driver::semantic() {
+  ast->semanticCheck(decTable);
 }
 
 void cat_driver::error(const yy::location& loc, const std::string& msg) {
