@@ -118,6 +118,7 @@ void A_opExp::semanticCheck(DeclarationTable& table) {
     case A_oper::leOp:
     case A_oper::gtOp:
     case A_oper::geOp:
+      this->type = "int";
       if (left->type != "int") {
         cat_driver::error(left->loc, "A_opExp: left int type required");
         break;
@@ -126,10 +127,10 @@ void A_opExp::semanticCheck(DeclarationTable& table) {
         cat_driver::error(right->loc, "A_opExp: right int type required");
         break;
       }
-      this->type = "int";
       break;
     case A_oper::eqOp:
     case A_oper::neqOp:
+      this->type = "int";    
       if (left->type == "nil" && right->type != "nil") {
         A_typeDec* dec = table.retrieveType(right->type);
         if (dec != nullptr && dec->ty->kind != A_ty::Kind::A_recordTy) {
@@ -144,12 +145,11 @@ void A_opExp::semanticCheck(DeclarationTable& table) {
         cat_driver::error(this->loc, "A_opExp: the same type required");
       } else if (left->type == "void" || right->type == "void") {
         cat_driver::error(this->loc, "A_opExp: non-void type required");
-      } else {
-        this->type = left->type;
       }
       break;
     case A_oper::andOp:
     case A_oper::orOp:
+      this->type = "int";
       if (left->type == "void") {
         cat_driver::error(left->loc, "A_opExp: non-void type required");
         break;
@@ -158,7 +158,6 @@ void A_opExp::semanticCheck(DeclarationTable& table) {
         cat_driver::error(right->loc, "A_opExp: non-void type required");
         break;
       }
-      this->type = "int";
       break;
   }
 }

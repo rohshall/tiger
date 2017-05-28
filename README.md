@@ -17,5 +17,5 @@ When you add new **.cpp** and **.h** files in `./src`, you don't need to change 
 
 The details of cat's semantic checking are different from that of tiger.
 
-1. `if then` has value 
-2. function declaration must be ordered.
+1. var/type/function name can't be the same.
+2. code can't define function recursively.
