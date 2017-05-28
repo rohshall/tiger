@@ -189,7 +189,7 @@ vardec:
   | "var" id ":" id ":=" exp  { $$ = new A_varDec(@1,$2,$4,$6); }
 ;
 fundec: 
-    "function" id "(" typefields ")" "=" exp { $$ = new A_functionDec(@1,$2,$4,"",$7); }
+    "function" id "(" typefields ")" "=" exp { $$ = new A_functionDec(@1,$2,$4,"void",$7); }
   | "function" id "(" typefields ")" ":" id "=" exp { $$ = new A_functionDec(@1,$2,$4,$7,$9); }
 ;
 explist: 

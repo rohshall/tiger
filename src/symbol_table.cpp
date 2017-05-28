@@ -39,7 +39,7 @@ void DeclarationTable::addStandardLib(){
     static std::unique_ptr<A_functionDec> printFunc(new A_functionDec(
       "print",
       new A_fieldList(new A_field("s","string"),nullptr),
-      "",
+      "void",
       nullptr
     ));
     addFunc("print",printFunc.get());
@@ -48,7 +48,7 @@ void DeclarationTable::addStandardLib(){
     static std::unique_ptr<A_functionDec> flushFunc(new A_functionDec(
       "flush",
       nullptr,
-      "",
+      "void",
       nullptr
     ));
     addFunc("flush",flushFunc.get());
@@ -126,7 +126,7 @@ void DeclarationTable::addStandardLib(){
     static std::unique_ptr<A_functionDec> exitFunc(new A_functionDec(
       "exit",
       new A_fieldList(new A_field("i","int"),nullptr),
-      "",
+      "void",
       nullptr
     ));
     addFunc("exit",exitFunc.get());

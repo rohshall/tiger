@@ -19,7 +19,7 @@ struct A_dec;
 struct AstNode {
   yy::location loc;
   std::string type;
-  AstNode() = default;
+  AstNode():type("void") {} 
   AstNode(const yy::location& _loc) : loc(_loc), type("void") {}
   virtual ~AstNode() = default;
   virtual void semanticCheck(DeclarationTable& table) { assert(false); }

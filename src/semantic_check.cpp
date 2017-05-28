@@ -82,11 +82,7 @@ void A_callExp::semanticCheck(DeclarationTable& table) {
     return;
   }
   // return type
-  if (dec->type_id.empty()) {
-    this->type = "void";
-  } else {
-    this->type = dec->type_id;
-  }
+  this->type = dec->type_id;
   // check type of function parameters
   A_fieldList* cur_type = dec->params.get();
   A_expList* cur_exp = args.get();
@@ -226,6 +222,7 @@ void A_assignExp::semanticCheck(DeclarationTable& table) {
   } else if (var->type != exp->type) {
     cat_driver::error(this->loc, "A_assignExp: required the same type");
   }
+  this->type = "void";
 }
 
 void A_ifExp::semanticCheck(DeclarationTable& table) {
@@ -235,14 +232,15 @@ void A_ifExp::semanticCheck(DeclarationTable& table) {
     fbody->semanticCheck(table);
     if (tbody->type != fbody->type) {
       cat_driver::error(this->loc,
-                        "A_ifExp: the type of two branch aren't the same");
+                        "A_ifExp: the type of two branch("+tbody->type +" and "+fbody->type+") aren't the same");
     }
+    this->type = tbody->type;
   } else {
     if (tbody->type != "void") {
       cat_driver::error(tbody->loc, "A_ifExp: if then must be non value");
     }
+    this->type = "void";
   }
-  this->type = tbody->type;
 }
 
 void A_whileExp::semanticCheck(DeclarationTable& table) {
@@ -254,6 +252,7 @@ void A_whileExp::semanticCheck(DeclarationTable& table) {
   if (body->type != "void") {
     cat_driver::error(test->loc, "A_whileExp: void type required");
   }
+  this->type = "void";
 }
 
 void A_forExp::semanticCheck(DeclarationTable& table) {
@@ -264,9 +263,11 @@ void A_forExp::semanticCheck(DeclarationTable& table) {
   }
   table.beginScope();
   A_varDec intDec(id, "int", nullptr);
+  intDec.type = "int";
   table.addVar(id, &intDec);
   body->semanticCheck(table);
   table.endScope();
+  this->type = "void";
 }
 
 void A_breakExp::semanticCheck(DeclarationTable& table) { return; }
@@ -281,6 +282,7 @@ void A_letExp::semanticCheck(DeclarationTable& table) {
   A_expList* cur_exp = body.get();
   while (cur_exp != nullptr) {
     cur_exp->head->semanticCheck(table);
+    this->type = cur_exp->head->type;
     cur_exp = cur_exp->tail.get();
   }
   table.endScope();
@@ -351,6 +353,7 @@ void A_varDec::semanticCheck(DeclarationTable& table) {
   }
 }
 
+// dec->type point to the actual type regardless of nameTy
 void A_typeDec::semanticCheck(DeclarationTable& table) {
   bool res = table.addType(type_id, this);
   if (!res) {
@@ -388,11 +391,8 @@ void A_functionDec::semanticCheck(DeclarationTable& table) {
     }
     cur = cur->tail.get();
   }
-  if (this->type_id.empty()) {
-    this->type = "void";
-  } else {
-    this->type = this->type_id;
-  }
+  
+  this->type = this->type_id;
   body->semanticCheck(table);
   if (body->type != this->type_id) {
     cat_driver::error(this->loc,
