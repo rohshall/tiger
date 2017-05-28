@@ -25,10 +25,12 @@ void DeclarationTable::addStandardLib(){
   // add type
   {
     static std::unique_ptr<A_typeDec> intType(new A_typeDec("int",new A_nameTy("int")));
+    intType->type = "int";
     addType("int",intType.get());
   }
   {
     static std::unique_ptr<A_typeDec> stringType(new A_typeDec("string",new A_nameTy("string")));
+    stringType->type = "string";
     addType("string",stringType.get());
   }
 

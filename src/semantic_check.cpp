@@ -272,7 +272,7 @@ void A_arrayExp::semanticCheck(DeclarationTable& table) {
   init->semanticCheck(table);
   A_arrayTy* ty_arr = dynamic_cast<A_arrayTy*>(dec->ty.get());
   assert(ty_arr != nullptr);
-  if (ty_arr->id != init->type) {
+  if (ty_arr->type != init->type) {
     cat_driver::error(init->loc, "A_arrayExp: unmatched array type");
   }
   this->type = type_id;
@@ -310,6 +310,7 @@ void A_typeDec::semanticCheck(DeclarationTable& table) {
     return;
   }
   ty->semanticCheck(table);
+  this->type = ty->type;
 }
 
 void A_functionDec::semanticCheck(DeclarationTable& table) {
@@ -342,7 +343,9 @@ void A_nameTy::semanticCheck(DeclarationTable& table) {
   A_typeDec* dec = table.retrieveType(id);
   if (dec == nullptr) {
     cat_driver::error(this->loc, "A_nameTy: undefined type " + id);
+    return ;
   }
+  this->type = dec->type;
 }
 
 void A_recordTy::semanticCheck(DeclarationTable& table) {
@@ -360,5 +363,7 @@ void A_arrayTy::semanticCheck(DeclarationTable& table) {
   A_typeDec* dec = table.retrieveType(id);
   if (dec == nullptr) {
     cat_driver::error(this->loc, "A_arrayTy: undefined type " + id);
+    return ;
   }
+  this->type = dec->type;
 }
