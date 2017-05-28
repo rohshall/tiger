@@ -12,3 +12,10 @@ A compiler of tiger language.
 ## note
 
 When you add new **.cpp** and **.h** files in `./src`, you don't need to change the `Makefile`.
+
+## difference
+
+The details of cat's semantic checking are different from that of tiger.
+
+1. `if then` has value 
+2. function declaration must be ordered.

@@ -1,6 +1,7 @@
 #ifndef SYMBOL_TABLE
 #define SYMBOL_TABLE
 
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -26,12 +27,12 @@ class DeclarationTable {
   // just for convenient to access the table;
   std::unordered_map<std::string, A_varDec*>& vars();
   std::unordered_map<std::string, A_typeDec*>& types();
-  std::unordered_map<std::string, A_functionDec*> funcs();
+  std::unordered_map<std::string, A_functionDec*>& funcs();
   // expand the size of table
   template <typename T>
   void expand(T& table);
   template <typename T>
-  auto retrieve(const std::string& name, std::vector<T>& table, size_t& depth)
+  auto retrieve(const std::string& name, std::vector<T>& table, int& depth)
       -> typename T::mapped_type;
 
  private:
@@ -57,10 +58,9 @@ void DeclarationTable::expand(T& table) {
 }
 
 template <typename T>
-auto DeclarationTable::retrieve(const std::string& name, std::vector<T>& table, size_t& depth)
-    -> typename T::mapped_type {
-  for(depth = curDepth;depth>=0;--depth){
-    if(table[depth].find(name) != table[depth].end()){
+auto DeclarationTable::retrieve(const std::string& name, std::vector<T>& table,int& depth) -> typename T::mapped_type {
+  for (depth = curDepth; depth >= 0; --depth) {
+    if (table[depth].find(name) != table[depth].end()) {
       return table[depth][name];
     }
   }

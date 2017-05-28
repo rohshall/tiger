@@ -10,7 +10,7 @@ std::unordered_map<std::string, A_typeDec*>& DeclarationTable::types(){
   return typeTable[curDepth];
 }
 
-std::unordered_map<std::string, A_functionDec*> DeclarationTable::funcs(){
+std::unordered_map<std::string, A_functionDec*>& DeclarationTable::funcs(){
   return funcTable[curDepth];
 }
 
@@ -152,17 +152,17 @@ bool DeclarationTable::addFunc(const std::string& name, A_functionDec* dec){
 }
 
 A_varDec* DeclarationTable::retrieveVar(const std::string& name){
-  size_t depth;
+  int depth;
   return retrieve(name,varTable,depth);
 }
 
 A_typeDec* DeclarationTable::retrieveType(const std::string& name){
-  size_t depth;
+  int depth;
   return retrieve(name,typeTable,depth);
 }
 
 A_functionDec* DeclarationTable::retrieveFunc(const std::string& name){
-  size_t depth;
+  int depth;
   return retrieve(name,funcTable,depth);
 }
 

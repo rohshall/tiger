@@ -38,7 +38,8 @@ void A_fieldVar::semanticCheck(DeclarationTable& table) {
     cur = cur->tail.get();
   }
   if (cur == nullptr) {
-    cat_driver::error(var->loc, "A_fieldVar: no such field in record " + var->type);
+    cat_driver::error(var->loc,
+                      "A_fieldVar: no such field in record " + var->type);
   } else {
     this->type = cur->head->type_id;
   }
@@ -90,14 +91,18 @@ void A_callExp::semanticCheck(DeclarationTable& table) {
   A_fieldList* cur_type = dec->params.get();
   A_expList* cur_exp = args.get();
   while (cur_exp != nullptr && cur_type != nullptr) {
+    cur_exp->head->semanticCheck(table);
     if (cur_type->head->type_id != cur_exp->head->type) {
-      cat_driver::error(cur_exp->loc,"A_callExp: "+ cur_type->head->type_id + " type required");
+      cat_driver::error(
+          cur_exp->loc,
+          "A_callExp: " + cur_type->head->type_id + " type required");
     }
     cur_exp = cur_exp->tail.get();
     cur_type = cur_type->tail.get();
   }
   if (cur_exp != nullptr || cur_type != nullptr) {
-    cat_driver::error(this->loc, "A_callExp: function params isn't match its declaration");
+    cat_driver::error(this->loc,
+                      "A_callExp: function params isn't match its declaration");
   }
 }
 
@@ -114,18 +119,28 @@ void A_opExp::semanticCheck(DeclarationTable& table) {
     case A_oper::gtOp:
     case A_oper::geOp:
       if (left->type != "int") {
-        cat_driver::error(left->loc, "A_opExp: int type required");
+        cat_driver::error(left->loc, "A_opExp: left int type required");
         break;
       }
       if (right->type != "int") {
-        cat_driver::error(right->loc, "A_opExp: int type required");
+        cat_driver::error(right->loc, "A_opExp: right int type required");
         break;
       }
       this->type = "int";
       break;
     case A_oper::eqOp:
     case A_oper::neqOp:
-      if (left->type != right->type) {
+      if (left->type == "nil" && right->type != "nil") {
+        A_typeDec* dec = table.retrieveType(right->type);
+        if (dec != nullptr && dec->ty->kind != A_ty::Kind::A_recordTy) {
+          cat_driver::error(this->loc, "A_opExp: the same type required");
+        }
+      } else if (left->type != "nil" && right->type == "nil") {
+        A_typeDec* dec = table.retrieveType(left->type);
+        if (dec != nullptr && dec->ty->kind != A_ty::Kind::A_recordTy) {
+          cat_driver::error(this->loc, "A_opExp: the same type required");
+        }
+      } else if (left->type != right->type) {
         cat_driver::error(this->loc, "A_opExp: the same type required");
       } else if (left->type == "void" || right->type == "void") {
         cat_driver::error(this->loc, "A_opExp: non-void type required");
@@ -151,7 +166,8 @@ void A_opExp::semanticCheck(DeclarationTable& table) {
 void A_recordExp::semanticCheck(DeclarationTable& table) {
   A_typeDec* dec = table.retrieveType(type_id);
   if (dec == nullptr) {
-    cat_driver::error(this->loc, "A_recordExp: undefine record type " + type_id);
+    cat_driver::error(this->loc,
+                      "A_recordExp: undefine record type " + type_id);
     return;
   }
   if (dec->ty->kind != A_ty::Kind::A_recordTy) {
@@ -170,8 +186,14 @@ void A_recordExp::semanticCheck(DeclarationTable& table) {
       break;
     }
     cur_var->head->exp->semanticCheck(table);
-    if (cur_var->head->exp->type != cur_def->head->type_id) {
-      cat_driver::error(cur_var->loc, "A_recordExp: unmatched type of this variable");
+    A_typeDec* tres = table.retrieveType(cur_def->head->type);
+
+    if (tres != nullptr && cur_var->head->exp->type == "nil" &&
+        tres->ty->kind == A_ty::Kind::A_recordTy) {
+      // do nothing, just skip
+    } else if (cur_var->head->exp->type != cur_def->head->type_id) {
+      cat_driver::error(cur_var->loc,
+                        "A_recordExp: unmatched type of this variable");
       break;
     }
     cur_var = cur_var->tail.get();
@@ -192,13 +214,18 @@ void A_assignExp::semanticCheck(DeclarationTable& table) {
   var->semanticCheck(table);
   exp->semanticCheck(table);
   if (var->type == "void") {
-    cat_driver::error(var->loc, "A_seqExp: the type cannot be void");
+    cat_driver::error(var->loc, "A_assignExp: the type cannot be void");
   }
   if (exp->type == "void") {
-    cat_driver::error(exp->loc, "A_seqExp: the type cannnot be void");
+    cat_driver::error(exp->loc, "A_assignExp: the type cannnot be void");
   }
-  if (var->type != exp->type) {
-    cat_driver::error(this->loc, "A_seqExp: required the same type");
+  A_typeDec* dec = table.retrieveType(var->type);
+
+  if (dec != nullptr && dec->ty->kind == A_ty::Kind::A_recordTy &&
+      exp->type == "nil") {
+    // do nothing, right
+  } else if (var->type != exp->type) {
+    cat_driver::error(this->loc, "A_assignExp: required the same type");
   }
 }
 
@@ -208,7 +235,12 @@ void A_ifExp::semanticCheck(DeclarationTable& table) {
   if (fbody != nullptr) {
     fbody->semanticCheck(table);
     if (tbody->type != fbody->type) {
-      cat_driver::error(this->loc, "A_ifExp: the type of two branch aren't the same");
+      cat_driver::error(this->loc,
+                        "A_ifExp: the type of two branch aren't the same");
+    }
+  } else {
+    if (tbody->type != "void") {
+      cat_driver::error(tbody->loc, "A_ifExp: if then must be non value");
     }
   }
   this->type = tbody->type;
@@ -220,8 +252,8 @@ void A_whileExp::semanticCheck(DeclarationTable& table) {
     cat_driver::error(test->loc, "A_whileExp: int type required");
   }
   body->semanticCheck(table);
-  if(body->type != "void"){
-    cat_driver::error(test->loc, "A_whileExp: void type required");    
+  if (body->type != "void") {
+    cat_driver::error(test->loc, "A_whileExp: void type required");
   }
 }
 
@@ -261,7 +293,12 @@ void A_arrayExp::semanticCheck(DeclarationTable& table) {
     cat_driver::error(this->loc, "A_arrayExp: undefined type " + type_id);
     return;
   }
-  if (dec->ty->kind != A_ty::Kind::A_arrayTy) {
+  A_typeDec* dec2 = table.retrieveType(dec->type);
+  if (dec2 == nullptr) {
+    cat_driver::error(this->loc, "A_arrayExp: undefined type " + dec->type);
+    return;
+  }
+  if (dec2->ty->kind != A_ty::Kind::A_arrayTy) {
     cat_driver::error(this->loc, "A_arrayExp: array type required");
     return;
   }
@@ -270,9 +307,10 @@ void A_arrayExp::semanticCheck(DeclarationTable& table) {
     cat_driver::error(size->loc, "A_arrayExp: int type required");
   }
   init->semanticCheck(table);
-  A_arrayTy* ty_arr = dynamic_cast<A_arrayTy*>(dec->ty.get());
+  A_arrayTy* ty_arr = dynamic_cast<A_arrayTy*>(dec2->ty.get());
   assert(ty_arr != nullptr);
-  if (ty_arr->type != init->type) {
+  A_typeDec* dec3 = table.retrieveType(ty_arr->id);
+  if (dec3!=nullptr && dec3->type != init->type){
     cat_driver::error(init->loc, "A_arrayExp: unmatched array type");
   }
   this->type = type_id;
@@ -282,23 +320,34 @@ void A_varDec::semanticCheck(DeclarationTable& table) {
   init->semanticCheck(table);
   if (type_id.empty()) {
     if (init->type == "nil" || init->type == "void") {
-      cat_driver::error(init->loc,
-                        "A_varDec: init should not be nil without type in " + id);
+      cat_driver::error(
+          init->loc, "A_varDec: init should not be nil without type in " + id);
     }
     table.addVar(id, this);
-    this->type = init->type;
+    this->type_id = this->type = init->type;
   } else {
     A_typeDec* dec = table.retrieveType(type_id);
     if (dec == nullptr) {
-      cat_driver::error(this->loc, "undefined type " + type_id);
+      cat_driver::error(this->loc, "A_varDec: undefined type " + type_id);
     } else {
-      if (type_id != init->type) {
-        cat_driver::error(
-            this->loc,
-            "A_varDec: unmatched type between " + type_id + " and " + init->type);
+      if (init->type == "nil") {
+        A_typeDec* dec2 = table.retrieveType(dec->type);
+        if (dec2 != nullptr && dec2->ty->kind != A_ty::Kind::A_recordTy) {
+          cat_driver::error(init->loc, "A_varDec: init should not be nil");
+        }
+      } else if (init->type == "void") {
+        cat_driver::error(init->loc, "A_varDec: init should not be void");
+      } else {
+        A_typeDec* dec2 = table.retrieveType(init->type);
+        if (dec2 != nullptr && dec->type != init->type &&
+            dec->type != dec2->type) {
+          cat_driver::error(this->loc,
+                            "A_varDec: unmatched type between " + type_id +
+                                " and " + init->type);
+        }
       }
       table.addVar(id, this);
-      this->type = type_id;
+      this->type = this->type_id;
     }
   }
 }
@@ -310,40 +359,53 @@ void A_typeDec::semanticCheck(DeclarationTable& table) {
     return;
   }
   ty->semanticCheck(table);
-  this->type = ty->type;
+  if (ty->kind == A_ty::Kind::A_nameTy) {
+    this->type = ty->type;
+  } else {
+    this->type = type_id;
+  }
 }
 
 void A_functionDec::semanticCheck(DeclarationTable& table) {
   A_functionDec* fdec = table.retrieveFunc(id);
   if (fdec != nullptr) {
-    cat_driver::error(this->loc, "A_functionDec: the function " + id + " has existed");
+    cat_driver::error(this->loc,
+                      "A_functionDec: the function " + id + " has existed");
     return;
   }
+  bool res = table.addFunc(id, this);
+
   A_fieldList* cur = params.get();
   while (cur != nullptr) {
     A_typeDec* dec = table.retrieveType(cur->head->type_id);
     if (dec == nullptr) {
-      cat_driver::error(cur->loc, "A_functionDec: undefined type " + cur->head->type_id);
+      cat_driver::error(cur->loc,
+                        "A_functionDec: undefined type " + cur->head->type_id);
+    }
+    {
+      static std::unique_ptr<A_varDec> tvar(
+          new A_varDec(cur->head->id, cur->head->type_id, nullptr));
+      table.addVar(cur->head->id, tvar.get());
     }
     cur = cur->tail.get();
   }
-  body->semanticCheck(table);
   if (this->type_id.empty()) {
     this->type = "void";
   } else {
-    if (body->type != this->type_id) {
-      cat_driver::error(this->loc, "A_functionDec: unmatched return type " + type_id);
-    }
     this->type = this->type_id;
   }
-  table.addFunc(id, this);
+  body->semanticCheck(table);
+  if (body->type != this->type_id) {
+    cat_driver::error(this->loc,
+                      "A_functionDec: unmatched return type " + type_id);
+  }
 }
 
 void A_nameTy::semanticCheck(DeclarationTable& table) {
   A_typeDec* dec = table.retrieveType(id);
   if (dec == nullptr) {
     cat_driver::error(this->loc, "A_nameTy: undefined type " + id);
-    return ;
+    return;
   }
   this->type = dec->type;
 }
@@ -353,7 +415,8 @@ void A_recordTy::semanticCheck(DeclarationTable& table) {
   while (cur != nullptr) {
     A_typeDec* dec = table.retrieveType(cur->head->type_id);
     if (dec == nullptr) {
-      cat_driver::error(cur->loc, "A_recordTy: undefined type " + cur->head->type_id);
+      cat_driver::error(cur->loc,
+                        "A_recordTy: undefined type " + cur->head->type_id);
     }
     cur = cur->tail.get();
   }
@@ -363,7 +426,6 @@ void A_arrayTy::semanticCheck(DeclarationTable& table) {
   A_typeDec* dec = table.retrieveType(id);
   if (dec == nullptr) {
     cat_driver::error(this->loc, "A_arrayTy: undefined type " + id);
-    return ;
+    return;
   }
-  this->type = dec->type;
 }
