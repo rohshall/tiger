@@ -12,10 +12,14 @@ void cat_driver::parse(const std::string& f) {
   parser.parse();
   scan_end();
 }
+
 void cat_driver::semantic() {
   ast->semanticCheck(decTable);
 }
 
+void cat_driver::translate() {
+  //irt.reset(ast->translate());
+}
 void cat_driver::error(const yy::location& loc, const std::string& msg) {
   std::cout << loc << " : " << msg << std::endl;
 }

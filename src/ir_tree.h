@@ -21,6 +21,10 @@ T_relOp T_notRel(T_relOp r);
 T_relOp T_commute(T_relOp r);
 
 struct IRNode{
+  enum class NodeKind{
+    T_stm,T_exp
+  };
+  NodeKind nodeKind;
   virtual ~IRNode() = default;
 };
 
@@ -28,7 +32,7 @@ struct IRNode{
  * T_stm 
  */
 struct T_stm : IRNode{
-  enum class Kind{
+  enum class StmKind{
     T_seq, 
     T_label,
     T_jump,
@@ -36,7 +40,7 @@ struct T_stm : IRNode{
     T_move,
     T_stm_exp
   };
-  Kind kind;
+  StmKind stmKind;
 };
 
 struct T_seq : T_stm{
@@ -77,7 +81,7 @@ struct T_stm_exp : T_stm{
  */
 
 struct T_exp : IRNode{
-  enum class Kind{
+  enum class ExpKind{
     T_binop,
     T_mem,
     T_temp,
@@ -86,7 +90,7 @@ struct T_exp : IRNode{
     T_const,
     T_call
   };
-  Kind kind;
+  ExpKind expKind;
 };
 
 

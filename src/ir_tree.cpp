@@ -2,15 +2,18 @@
 #include <algorithm>
 
 T_seq::T_seq(T_stm* _left, T_stm* _right) : left(_left), right(_right) {
-  kind = Kind::T_seq;
+  stmKind = StmKind::T_seq;
+  nodeKind = NodeKind::T_stm;
 }
 
 T_label::T_label(const std::string& _id) : id(std::move(_id)) {
-  kind = Kind::T_label;
+  stmKind = StmKind::T_label;
+  nodeKind = NodeKind::T_stm;
 }
 
 T_jump::T_jump(T_exp* _exp, T_label* _label) : exp(_exp), label(_label) {
-  kind = Kind::T_jump;
+  stmKind = StmKind::T_jump;
+  nodeKind = NodeKind::T_stm;
 }
 
 T_cjump::T_cjump(T_relOp _op, T_exp* _left, T_exp* _right, T_label* _true,
@@ -20,38 +23,54 @@ T_cjump::T_cjump(T_relOp _op, T_exp* _left, T_exp* _right, T_label* _true,
       right(_right),
       label_true(_true),
       label_false(_false) {
-  kind = Kind::T_cjump;
+  stmKind = StmKind::T_cjump;
+  nodeKind = NodeKind::T_stm;
 }
 
 T_move::T_move(T_exp* _dst, T_exp* _src) : dst(_dst), src(_src) {
-  kind = Kind::T_move;
+  stmKind = StmKind::T_move;
+  nodeKind = NodeKind::T_stm;
 }
 
-T_stm_exp::T_stm_exp(T_exp* _exp) : exp(_exp) { kind = Kind::T_stm_exp; }
+T_stm_exp::T_stm_exp(T_exp* _exp) : exp(_exp) {
+  stmKind = StmKind::T_stm_exp;
+  nodeKind = NodeKind::T_stm;
+}
 
 T_binop::T_binop(T_binOp _op, T_exp* _left, T_exp* _right)
     : op(_op), left(_left), right(_right) {
-  kind = Kind::T_binop;
+  expKind = ExpKind::T_binop;
+  nodeKind = NodeKind::T_exp;
 }
 
-T_mem::T_mem(T_exp* _exp) : exp(_exp) { kind = Kind::T_mem; }
+T_mem::T_mem(T_exp* _exp) : exp(_exp) {
+  expKind = ExpKind::T_mem;
+  nodeKind = NodeKind::T_exp;
+}
 
 T_temp::T_temp(const std::string& _id) : id(std::move(_id)) {
-  kind = Kind::T_temp;
+  expKind = ExpKind::T_temp;
+  nodeKind = NodeKind::T_exp;
 }
 
-T_eseq::T_eseq(T_stm* _stm, T_exp* _exp) : stm(_stm),exp(_exp) {
-  kind = Kind::T_eseq;
+T_eseq::T_eseq(T_stm* _stm, T_exp* _exp) : stm(_stm), exp(_exp) {
+  expKind = ExpKind::T_eseq;
+  nodeKind = NodeKind::T_exp;
 }
 
 T_name::T_name(const std::string& _id) : id(std::move(_id)) {
-  kind = Kind::T_name;
+  expKind = ExpKind::T_name;
+  nodeKind = NodeKind::T_exp;
 }
 
-T_const::T_const(int _val) : val(_val) { kind = Kind::T_const; }
+T_const::T_const(int _val) : val(_val) {
+  expKind = ExpKind::T_const;
+  nodeKind = NodeKind::T_exp;
+}
 
 T_call::T_call(T_exp* _func, T_expList* _args) : func(_func), args(_args) {
-  kind = Kind::T_call;
+  expKind = ExpKind::T_call;
+  nodeKind = NodeKind::T_exp;
 }
 
 T_expList::T_expList(T_exp* _head, T_expList* _tail)
