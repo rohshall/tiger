@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
     else{
       driver.parse(argv[i]);
       driver.semantic();
+      driver.printast();
     }
   }
   std::cout<<"Compiler Finished."<<std::endl;  

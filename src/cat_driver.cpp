@@ -17,6 +17,10 @@ void cat_driver::semantic() {
   ast->semanticCheck(decTable);
 }
 
+void cat_driver::printast() {
+  ast->printast();
+}
+
 void cat_driver::translate() {
   //irt.reset(ast->translate());
 }

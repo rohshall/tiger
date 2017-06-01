@@ -37,6 +37,8 @@ public:
   void parse (const std::string& f);
   // Semantic check
   void semantic();
+  // Print Ast
+  void printast();
   // Translate ast to irt
   void translate();
   // Error handling.
