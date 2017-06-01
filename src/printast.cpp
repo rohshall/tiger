@@ -6,7 +6,8 @@
 
 void A_Program::printast(){
   std::cout<<"A_Program(";
-  exp->printast();
+  if(exp!=nullptr)
+     exp->printast();
   std::cout<<")";
 }
 
@@ -16,35 +17,42 @@ void A_simpleVar::printast(){
 
 void A_fieldVar::printast(){
     std::cout<<"A_fieldVar(";
-    var->printast();
+    if(var!=nullptr)
+       var->printast();
     std::cout<<"."<<id<<")";
 }
 
 void A_subscriptVar::printast(){
     std::cout<<"A_subscriptVar(";
-    var->printast();
+    if(var!=nullptr)
+       var->printast();
     std::cout<<"[";
-    exp->printast();
+    if(exp!=nullptr)
+        exp->printast();
     std::cout<<"])";
 }
 
 void A_varExp::printast(){
     std::cout<<"A_varExp(";
-    var->printast();
+    if(var!=nullptr)
+        var->printast();
     std::cout<<")";
 }
 
 void A_callExp::printast(){
     std::cout<<"A_callExp("<<id<<",";
-    args->printast();
+    if(args!=nullptr)
+        args->printast();
     std::cout<<")";
 }
 
 void A_assignExp::printast(){
     std::cout<<"A_assignExp(";
-    var->printast();
+    if(var!=nullptr)
+        var->printast();
     std::cout<<",";
-    exp->printast();
+    if(exp!=nullptr)
+        exp->printast();
     std::cout<<")";
 }
 
@@ -54,7 +62,8 @@ void A_nilExp::printast(){
 
 void A_seqExp::printast(){
     std::cout<<"A_seqExp(";
-    seq->printast();
+    if(seq!=nullptr)
+        seq->printast();
     std::cout<<")";
 }
 
@@ -95,51 +104,64 @@ void A_opExp::printast(){
             std::cout<<"OR";break; 
     }
     std::cout<<",";
-    left->printast();
+    if(left!=nullptr)
+        left->printast();
     std::cout<<",";
-    right->printast();
+    if(right!=nullptr)  
+        right->printast();
     std::cout<<")";
 }
 
 void A_recordExp::printast(){
     std::cout<<"A_recordExp(TYPE("<<type_id<<"),";
-    fields->printast();
+    if(fields!=nullptr)
+        fields->printast();
     std::cout<<")";
 }
 
 void A_arrayExp::printast(){
     std::cout<<"A_arrayExp(TYPE("<<type_id<<"),SIZE(";
-    size->printast();
+    if(size!=nullptr)
+        size->printast();
     std::cout<<"),INIT(";
-    init->printast();
+    if(init!=nullptr)   
+        init->printast();
     std::cout<<"))";
 }
 
 void A_ifExp::printast(){
     std::cout<<"A_ifExp(IF(";
-    test->printast();
+    if(test!=nullptr)
+        test->printast();
     std::cout<<"),THEN(";
-    tbody->printast();
+    if(tbody!=nullptr)
+        tbody->printast();
     std::cout<<"),ELSE(";
-    fbody->printast();
+    if(fbody!=nullptr)
+        fbody->printast();
     std::cout<<"))";
 }
 
 void A_whileExp::printast(){
     std::cout<<"A_whileExp(WHILE(";
-    test->printast();
+    if(test!=nullptr)
+        test->printast();
     std::cout<<"),DO(";
-    body->printast();
+    if(body!=nullptr)
+        body->printast();
     std::cout<<"))";
 }
 
 void A_forExp::printast(){
     std::cout<<"A_forExp(LOW(";
-    low->printast();
+    if(low!=nullptr)
+        low->printast();
     std::cout<<"),HIGH(";
-    high->printast();
+    if(high!=nullptr)
+        high->printast();
     std::cout<<"),BODY(";
-    body->printast();
+    if(body!=nullptr)   
+        body->printast();
     std::cout<<"))";
 }
 
@@ -149,29 +171,35 @@ void A_breakExp::printast(){
 
 void A_letExp::printast(){
     std::cout<<"A_letExp(DECS(";
-    decs->printast();
+    if(decs!=nullptr)
+        decs->printast();
     std::cout<<"),BODY(";
-    body->printast();
+    if(body!=nullptr)
+        body->printast();
     std::cout<<"))";
 }
 
 void A_varDec::printast(){
     std::cout<<"A_varDec(ID("<<id<<"),TYPE("<<type_id<<"),INIT(";
-    init->printast();
+    if(init!=nullptr)   
+        init->printast();
     std::cout<<"))";
 }
 
 void A_typeDec::printast(){
     std::cout<<"A_typeDec(ID("<<type_id<<"),TYPE(";
-    ty->printast();
+    if(ty!=nullptr)
+        ty->printast();
     std::cout<<"))";
 }
 
 void A_functionDec::printast(){
     std::cout<<"A_functionDec(ID("<<id<<"),TYPE("<<type_id<<"),PARAM(";
-    params->printast();
+    if(params!=nullptr)
+        params->printast();
     std::cout<<"),BODY(";
-    body->printast();
+    if(body!=nullptr)
+        body->printast();
     std::cout<<"))";
 }
 
@@ -181,7 +209,8 @@ void A_nameTy::printast(){
 
 void A_recordTy::printast(){
     std::cout<<"A_recordTy(";
-    record->printast();
+    if(record!=nullptr)
+        record->printast();
     std::cout<<")";
 }
 
@@ -231,7 +260,8 @@ void A_decList::printast(){
 
 void A_efield::printast(){
     std::cout<<"A_efield(ID("<<id<<"),";
-    exp->printast();
+    if(exp!=nullptr)
+        exp->printast();
     std::cout<<")";
 }
 
