@@ -6,7 +6,7 @@
  * the semanticCheck will set itself type
  * type including: void, nil, int, string and user-defined type
  */
-
+int fieldCount = 0;
 void A_Program::semanticCheck(DeclarationTable& table) {
   exp->semanticCheck(table);
 }
@@ -21,6 +21,7 @@ void A_simpleVar::semanticCheck(DeclarationTable& table) {
 }
 
 void A_fieldVar::semanticCheck(DeclarationTable& table) {
+  fieldCount = 0;
   var->semanticCheck(table);
   A_typeDec* dec = table.retrieveType(var->type);
   if (dec == nullptr) return;
@@ -32,6 +33,7 @@ void A_fieldVar::semanticCheck(DeclarationTable& table) {
   assert(ty_rec != nullptr);
   A_fieldList* cur = ty_rec->record.get();
   while (cur != nullptr) {
+    fieldCount++;
     if (cur->head->id == id) {
       break;
     }
@@ -42,6 +44,7 @@ void A_fieldVar::semanticCheck(DeclarationTable& table) {
                       "A_fieldVar: no such field in record " + var->type);
   } else {
     this->type = cur->head->type_id;
+    this->offset = fieldCount;
   }
 }
 

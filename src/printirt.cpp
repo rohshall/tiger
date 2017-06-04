@@ -195,7 +195,10 @@ void T_eseq::printirt(){
     else
         print("NULL");
     print(",");
-    exp->printirt();
+    if(exp != nullptr)
+        exp->printirt();
+    else
+        print("NULL");
     print(")");
 }
 
@@ -217,6 +220,10 @@ void T_call::printirt(){
         print("NULL");
     print(")");
 }
+
+void T_exp_stm::printirt(){
+    stm->printirt();
+} 
 
 void T_expList::printirt(){
     print("T_EXPLIST(");

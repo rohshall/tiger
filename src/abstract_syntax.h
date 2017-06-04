@@ -26,7 +26,7 @@ struct AstNode {
   virtual void semanticCheck(DeclarationTable& table) { assert(false); }
   virtual void printast() {};
   virtual IRNode* translate() {};
-  virtual IRNode* translate(DeclarationTable& table){ assert(false); }
+//  virtual IRNode* translate(DeclarationTable& table){ assert(false); }
 };
 
 struct A_Program : AstNode {
@@ -35,7 +35,7 @@ struct A_Program : AstNode {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 
 /*
@@ -53,17 +53,18 @@ struct A_simpleVar : A_var {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // field
 struct A_fieldVar : A_var {
   std::unique_ptr<A_var> var;
   std::string id;
+  int offset = -1;
   A_fieldVar(const yy::location& _loc, A_var* _var, const std::string& _id);
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // array subscript
 struct A_subscriptVar : A_var {
@@ -73,7 +74,7 @@ struct A_subscriptVar : A_var {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 
 /*
@@ -106,7 +107,7 @@ struct A_varExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // funcall
 struct A_callExp : A_exp {
@@ -116,7 +117,7 @@ struct A_callExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // lvalue ":=" exp
 struct A_assignExp : A_exp {
@@ -126,7 +127,7 @@ struct A_assignExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // NIL
 struct A_nilExp : A_exp {
@@ -134,7 +135,7 @@ struct A_nilExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // seq
 struct A_seqExp : A_exp {
@@ -143,7 +144,7 @@ struct A_seqExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // INT
 struct A_intExp : A_exp {
@@ -152,7 +153,7 @@ struct A_intExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // STRING
 struct A_stringExp : A_exp {
@@ -161,7 +162,7 @@ struct A_stringExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // exp op exp
 enum class A_oper {
@@ -187,7 +188,7 @@ struct A_opExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // record
 struct A_recordExp : A_exp {
@@ -198,7 +199,7 @@ struct A_recordExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // array
 struct A_arrayExp : A_exp {
@@ -209,7 +210,7 @@ struct A_arrayExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // if
 struct A_ifExp : A_exp {
@@ -218,7 +219,7 @@ struct A_ifExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // while
 struct A_whileExp : A_exp {
@@ -227,7 +228,7 @@ struct A_whileExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // for
 struct A_forExp : A_exp {
@@ -238,7 +239,7 @@ struct A_forExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // break
 struct A_breakExp : A_exp {
@@ -246,7 +247,7 @@ struct A_breakExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // let
 struct A_letExp : A_exp {
@@ -256,7 +257,7 @@ struct A_letExp : A_exp {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 
 /*
@@ -277,7 +278,7 @@ struct A_varDec : A_dec {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // tydec
 struct A_typeDec : A_dec {
@@ -288,7 +289,7 @@ struct A_typeDec : A_dec {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // fundec
 struct A_functionDec : A_dec {
@@ -303,7 +304,7 @@ struct A_functionDec : A_dec {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 
 /*
@@ -321,7 +322,7 @@ struct A_nameTy : A_ty {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // record
 struct A_recordTy : A_ty {
@@ -330,7 +331,7 @@ struct A_recordTy : A_ty {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 // array
 struct A_arrayTy : A_ty {
@@ -339,7 +340,7 @@ struct A_arrayTy : A_ty {
   void semanticCheck(DeclarationTable& table) override;
   void printast() override;
   IRNode* translate() override;
-  IRNode* translate(DeclarationTable& table) override;
+  // IRNode* translate(DeclarationTable& table) override;
 };
 
 /*
@@ -351,7 +352,6 @@ struct A_field : AstNode {
   A_field(const yy::location& _loc, const std::string& _id,
           const std::string& _typ);
   void printast() override;
-  IRNode* translate() override;
 };
 struct A_fieldList : AstNode {
   std::unique_ptr<A_field> head;
@@ -359,7 +359,6 @@ struct A_fieldList : AstNode {
   A_fieldList(A_field* _head, A_fieldList* _tail);
   A_fieldList(const yy::location& _loc, A_field* _head, A_fieldList* _tail);
   void printast() override;
-  IRNode* translate() override;
 };
 
 /*
@@ -388,6 +387,7 @@ struct A_decList : AstNode {
  * refields
  */
 struct A_efield : AstNode {
+  int offset = -1;
   std::string id;
   std::unique_ptr<A_exp> exp;
   A_efield(const yy::location& _loc, const std::string& _id, A_exp* _exp);
@@ -400,7 +400,6 @@ struct A_efieldList : AstNode {
   std::unique_ptr<A_efieldList> tail;
   A_efieldList(const yy::location& _loc, A_efield* _head, A_efieldList* _tail);
   void printast() override;
-  IRNode* translate() override;
 };
 
 #endif  // ABSTRACT_SYNTAX

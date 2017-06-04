@@ -1,5 +1,5 @@
 #include "translate.h"
-
+const int wordsize = 4;
 FrameControl fcc;
 
 T_stm *IRNode2T_stm(IRNode *root){
@@ -21,11 +21,20 @@ T_stm *IRNode2T_stm(IRNode *root){
 }
 
 T_exp *IRnode2T_exp(IRNode *root){
-    T_exp *newptr = dynamic_cast<T_exp *>(root);
-    if(newptr != NULL)
-        std::cout << "IRNode2T_exp Wrong!\n";
-
-    return newptr;
+    if(root == NULL)
+        return NULL;
+    if(root->nodeKind == IRNode::NodeKind::T_exp){
+        T_exp *newptr = dynamic_cast<T_exp *>(root);        
+        if(newptr == NULL)
+            std::cout << "IRNode2T_stm Wrong!\n";
+        return newptr;
+    }
+    else{
+        T_exp_stm *newptr = new T_exp_stm(IRNode2T_stm(root)); 
+        if(newptr == NULL)
+            std::cout << "IRNode2T_stm Wrong!\n";
+        return newptr;
+    }
 }
 
 T_expList* IRNode2T_expList(IRNode *root){
@@ -86,11 +95,11 @@ IRNode* A_fieldVar::translate(){
     T_mem *root = new T_mem(
         new T_binop{
             T_binOp::T_plus,
-            new T_temp("1"),  /*field base*/
+            IRnode2T_exp(var->translate()),  /*field base*/
             new T_binop(
                 T_binOp::T_mul,
-                new T_const(1), /*field offset*/
-                new T_const(1)  /*word size*/
+                new T_const(this->offset - 1), /*field offset*/
+                new T_const(wordsize)  /*word size*/
             )
         }
     );
@@ -110,7 +119,7 @@ IRNode* A_subscriptVar::translate(){
                     nullptr, 
                     IRnode2T_exp(exp->translate())
                 ),
-                new T_const(4)  /*word size*/
+                new T_const(wordsize)  /*word size*/
             )
         }
     );
@@ -202,11 +211,23 @@ IRNode* A_opExp::translate(){
         //and 和 or 单独进行赋值处理
     }
 }
-
+int recordCount = 0;
 IRNode* A_recordExp::translate(){
-    // 应该是开始一个新的变量的赋值
-    if(fields == nullptr)
-        return NULL;
+    recordCount = 0;
+    T_stmList* varRoot = new T_stmList(NULL, NULL);
+    T_stmList* varCurList = varRoot;
+    A_efieldList* cur_var = fields.get();
+
+    while (cur_var != nullptr) {
+        recordCount ++;
+        T_stm* cur_vart = IRNode2T_stm(cur_var->head->translate());
+        if(cur_vart == NULL)
+            std::cout << "Record wrong!" << std::endl;
+        varCurList->head.reset(cur_vart);
+        varCurList->tail.reset(new T_stmList(NULL, NULL));
+        varCurList = varCurList->tail.get();
+        cur_var = cur_var->tail.get();
+    }
     T_eseq* root = new T_eseq(
         new T_seq(
             new T_move(
@@ -214,12 +235,12 @@ IRNode* A_recordExp::translate(){
                 new T_call(
                     new T_name("malloc"),
                     new T_expList(
-                        new T_const(1 * 1),
+                        new T_const(recordCount * wordsize),
                         NULL
                     )
                 )
             ),
-            IRNode2T_stm(fields->translate())
+            varRoot
         ),
         new T_temp("r") //获取新的temp表达式
     );
@@ -432,22 +453,25 @@ IRNode* A_arrayTy::translate(){
     return NULL;
 }
 
-IRNode* A_field::translate(){
-    return NULL;
-}
-
-IRNode* A_fieldList::translate(){
-    return NULL;
-}
-
 IRNode* A_expList::translate(){
     if(head == nullptr)
         return NULL;
-    //需要去判断是exp还是stm
-    T_expList* root = new T_expList(
-        NULL, NULL
-    );
-    return root;
+    
+    T_expList* expRoot = new T_expList(NULL, NULL);
+    T_expList* expCurList = expRoot;
+    A_expList* cur_exp = this;
+    while (cur_exp != nullptr) {
+        T_exp* cur_expt = IRnode2T_exp(cur_exp->head->translate());
+        if(cur_expt == NULL)
+            std::cout << "Let wrong!" << std::endl;
+        
+        expCurList->head.reset(cur_expt);
+        expCurList->tail.reset(new T_expList(NULL, NULL));
+        expCurList = expCurList->tail.get();
+        cur_exp = cur_exp->tail.get();
+    }
+
+    return expRoot;
 }
 
 IRNode* A_decList::translate(){
@@ -455,21 +479,18 @@ IRNode* A_decList::translate(){
 }
 
 IRNode* A_efield::translate(){
-    if(exp == nullptr)
-        return NULL;
+    if(offset == -1)
+        offset = recordCount;
     T_move* root = new T_move(
-        new T_temp(id),
+        new T_mem(
+            new T_binop(
+                T_binOp::T_plus,
+                new T_temp("t"),
+                new T_const((offset - 1) * wordsize)
+            )
+        ),
         IRnode2T_exp(exp->translate())
     );
     return root;
 }
 
-IRNode* A_efieldList::translate(){
-    if(head == nullptr)
-        return NULL;
-    T_seq* root = new T_seq(
-        IRNode2T_stm(head->translate()),
-        IRNode2T_stm(tail.get()->translate())
-    );
-    return root;
-}
