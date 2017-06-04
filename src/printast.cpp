@@ -1,3 +1,6 @@
+#ifndef PRINTAST
+#define PRINTAST
+
 #include <cassert>
 #include "abstract_syntax.h"
 #include "cat_driver.h"
@@ -276,3 +279,5 @@ void A_efieldList::printast(){
     }
     std::cout<<")";
 }
+
+#endif

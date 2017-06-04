@@ -19,7 +19,10 @@ int main(int argc, char *argv[]) {
       driver.parse(argv[i]);
       driver.semantic();
       driver.printast();
+      std::cout << std::endl;
+      driver.translate();
+      driver.printirt();
     }
   }
-  std::cout<<"Compiler Finished."<<std::endl;  
+  std::cout<<"\nCompiler Finished."<<std::endl;  
 }

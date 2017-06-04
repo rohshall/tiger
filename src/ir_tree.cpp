@@ -9,7 +9,7 @@ T_seq::T_seq(T_stm* _left, T_stm* _right) : left(_left), right(_right) {
 T_label::T_label(const std::string& _id) : id(std::move(_id)) {
   stmKind = StmKind::T_label;
   nodeKind = NodeKind::T_stm;
-}
+}   
 
 T_jump::T_jump(T_exp* _exp, T_label* _label) : exp(_exp), label(_label) {
   stmKind = StmKind::T_jump;
@@ -67,16 +67,33 @@ T_const::T_const(int _val) : val(_val) {
   expKind = ExpKind::T_const;
   nodeKind = NodeKind::T_exp;
 }
-
+/*
 T_call::T_call(T_exp* _func, T_expList* _args) : func(_func), args(_args) {
   expKind = ExpKind::T_call;
   nodeKind = NodeKind::T_exp;
 }
 
+T_call::T_call(std::string _id, T_expList* _args) : id(_id), args(_args){
+  expKind = ExpKind::T_call;
+  nodeKind = NodeKind::T_exp;
+}
+*/
+T_call::T_call(T_name* _funcName, T_expList* _args) : funcName(_funcName), args(_args){
+  expKind = ExpKind::T_call;
+  nodeKind = NodeKind::T_exp;
+}
+
 T_expList::T_expList(T_exp* _head, T_expList* _tail)
-    : head(_head), tail(_tail) {}
+    : head(_head), tail(_tail) {
+      expKind = ExpKind::T_expList;
+      nodeKind = NodeKind::T_exp;
+    }
+
 T_stmList::T_stmList(T_stm* _head, T_stmList* _tail)
-    : head(_head), tail(_tail) {}
+    : head(_head), tail(_tail) {
+      stmKind = StmKind::T_stmList;
+      nodeKind = NodeKind::T_stm;
+    }
 
 T_relOp T_notRel(T_relOp r) {
   switch (r) {

@@ -2,6 +2,7 @@
 #include "abstract_syntax.h"
 #include "symbol_table.h"
 #include "cat_driver.h"
+#include "ir_tree.h"
 
 A_Program::A_Program(const yy::location& _loc, A_exp* _exp)
     : AstNode(_loc), exp(_exp) {}

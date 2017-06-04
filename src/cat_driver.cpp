@@ -22,8 +22,18 @@ void cat_driver::printast() {
 }
 
 void cat_driver::translate() {
-  //irt.reset(ast->translate());
+//  irt.reset(ast->translate());
+  irt = ast->translate();
+//  irt = ast->translate(decTablet);
 }
+
+void cat_driver::printirt(){
+  switch(irt->nodeKind){
+    case IRNode::NodeKind::T_exp : IRnode2T_exp(irt)->printirt(); break;
+    case IRNode::NodeKind::T_stm : IRNode2T_stm(irt)->printirt(); break;
+  }
+}
+
 void cat_driver::error(const yy::location& loc, const std::string& msg) {
   std::cout << loc << " : " << msg << std::endl;
 }
