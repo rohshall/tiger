@@ -99,21 +99,39 @@ void T_cjump::printirt(){
     print("T_CJUMP(");
     printRelOp(op);
     print(",");
-    left->printirt();
+    if(left != NULL)
+        left->printirt();
+    else
+        print("NULL");
     print(",");
-    right->printirt();
+    if(right != NULL)
+        right->printirt();
+    else
+        print("NULL");
     print(",");
-    label_true->printirt();
+    if(label_true != NULL)
+        label_true->printirt();
+    else
+        print("NULL");
     print(",");
-    label_false->printirt();
+    if(label_false != NULL)
+        label_false->printirt();
+    else
+        print("NULL");
     print(")");
 }
 
 void T_move::printirt(){
     print("T_MOVE(");
-    dst->printirt();
+    if(dst != NULL)
+        dst->printirt();
+    else
+        print("NULL");
     print(",");
-    src->printirt();
+    if(src != NULL)
+        src->printirt();
+    else
+        print("NULL");
     print(")");
 }
 
@@ -195,7 +213,10 @@ void T_eseq::printirt(){
     else
         print("NULL");
     print(",");
-    exp->printirt();
+    if(exp != nullptr)
+        exp->printirt();
+    else
+        print("NULL");
     print(")");
 }
 
@@ -217,6 +238,10 @@ void T_call::printirt(){
         print("NULL");
     print(")");
 }
+
+void T_exp_stm::printirt(){
+    stm->printirt();
+} 
 
 void T_expList::printirt(){
     print("T_EXPLIST(");

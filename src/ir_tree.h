@@ -98,6 +98,7 @@ struct T_exp : IRNode{
     T_name,
     T_const,
     T_call,
+    T_exp_stm,
     T_expList
   };
   ExpKind expKind;
@@ -151,6 +152,12 @@ struct T_call : T_exp{
 //  T_call(T_exp* _func,T_expList* _args);
 //  T_call(std::string _id, T_expList* _args);
   T_call(T_name* _funcName, T_expList* _args);
+  void printirt() override;
+};
+
+struct T_exp_stm : T_exp{
+  std::unique_ptr<T_stm> stm;
+  T_exp_stm(T_stm* _stm);
   void printirt() override;
 };
 

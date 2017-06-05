@@ -83,6 +83,11 @@ T_call::T_call(T_name* _funcName, T_expList* _args) : funcName(_funcName), args(
   nodeKind = NodeKind::T_exp;
 }
 
+T_exp_stm::T_exp_stm(T_stm* _stm) : stm(_stm) {
+  expKind = ExpKind::T_exp_stm;
+  nodeKind = NodeKind::T_exp;
+}
+
 T_expList::T_expList(T_exp* _head, T_expList* _tail)
     : head(_head), tail(_tail) {
       expKind = ExpKind::T_expList;
