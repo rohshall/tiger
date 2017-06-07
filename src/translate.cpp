@@ -55,6 +55,8 @@ T_binOp getBinOperator(A_oper op){
         case A_oper::minusOp: return T_binOp::T_minus;
         case A_oper::timesOp: return T_binOp::T_mul;
         case A_oper::divideOp: return T_binOp::T_div;
+        case A_oper::andOp : return T_binOp::T_and;
+        case A_oper::orOp : return T_binOp::T_or;
     }
 }
 
@@ -80,12 +82,13 @@ IRNode* A_Program::translate(){
 
 IRNode* A_simpleVar::translate(){
     T_mem *root = fcc.MEM(id, -1, NULL);
-    // T_mem *root = new T_mem(
-    //     new T_binop(
-    //         T_binOp::T_plus, new T_temp(id),new T_const(1)
-    //         // have to check the temp
-    //     )
-    // );
+    if(root == NULL){
+        root = new T_mem(
+            new T_binop(
+                T_binOp::T_plus, new T_temp("fp"),new T_const(0)
+            )
+        );
+    }
     return root;
 }
 
@@ -105,7 +108,7 @@ IRNode* A_fieldVar::translate(){
     );
     return root;
 }
-
+ 
 IRNode* A_subscriptVar::translate(){
     if(var == nullptr || exp == nullptr)
         return NULL;
@@ -128,7 +131,8 @@ IRNode* A_subscriptVar::translate(){
 
 IRNode* A_varExp::translate(){
     if(var == nullptr)
-        return NULL;
+        return NULL; 
+    IRNode* tmp = var->translate();
     T_eseq *root = new T_eseq{
         NULL,
         IRnode2T_exp(var->translate())
@@ -183,12 +187,12 @@ IRNode* A_stringExp::translate(){
     );
     return root;
 }
-
+bool Cx = false;
 IRNode* A_opExp::translate(){
     if(left == nullptr || right == nullptr)
         return NULL;
     if(op >= A_oper::plusOp && op <= A_oper::divideOp){
-        T_binOp moperator = getBinOperator(op);
+        T_binOp moperator = getBinOperator(op); 
         T_binop* root = new T_binop(
             moperator,
             IRnode2T_exp(left->translate()),
@@ -198,17 +202,60 @@ IRNode* A_opExp::translate(){
     }
     else if (op >=A_oper::eqOp && op <= A_oper::geOp){
         T_relOp moperator = getRelOperator(op);
-        T_cjump* root = new T_cjump(
-            moperator,
-            IRnode2T_exp(left->translate()),
-            IRnode2T_exp(right->translate()),
-            new T_label("t"),
-            new T_label("f")
-        );
-        return root;
+        if(!Cx){
+            T_cjump* root = new T_cjump(
+                moperator,
+                IRnode2T_exp(left->translate()),
+                IRnode2T_exp(right->translate()),
+                new T_label("t"),
+                new T_label("f")
+            );
+            return root;
+        }
+        else{
+            T_eseq* root = new T_eseq(
+                new T_seq(
+                    new T_cjump(
+                        moperator,
+                        IRnode2T_exp(left->translate()),
+                        IRnode2T_exp(right->translate()),
+                        new T_label("t"),
+                        new T_label("f")
+                    ),
+                    new T_seq(
+                        new T_label("t"),
+                        new T_seq(
+                            new T_move(
+                                new T_temp("ret"),
+                                new T_const(1)
+                            ),
+                            new T_seq(
+                                new T_label("f"),
+                                new T_move(
+                                    new T_temp("ret"),
+                                    new T_const(0)
+                                )
+                            )
+                        )
+                    )
+                ),
+                new T_temp("ret")
+            );
+            return root;
+        }
     }
     else{
+        T_binOp moperator = getBinOperator(op);
+        Cx = true;
+        T_binop* root = new T_binop(
+            moperator,
+            IRnode2T_exp(left->translate()),
+            IRnode2T_exp(right->translate())
+        );
+        Cx = false;
+        return root;
         //and 和 or 单独进行赋值处理
+        //Only one level Cx
     }
 }
 int recordCount = 0;
@@ -228,6 +275,9 @@ IRNode* A_recordExp::translate(){
         varCurList = varCurList->tail.get();
         cur_var = cur_var->tail.get();
     }
+
+    varRoot->check();
+
     T_eseq* root = new T_eseq(
         new T_seq(
             new T_move(
@@ -278,24 +328,35 @@ IRNode* A_ifExp::translate(){
         return root;
     }
     else{
-        T_seq* root = new T_seq(
+        T_move* ttbody = new T_move(
+            new T_temp("ret"),
+            IRnode2T_exp(tbody->translate())
+        );
+        T_move* ffbody = new T_move(
+            new T_temp("ret"),
+            IRnode2T_exp(fbody->translate())
+        );
+        T_eseq* root = new T_eseq(
             new T_seq(
                 IRNode2T_stm(test->translate()),
                 new T_seq(
                     new T_label("t"),
                     new T_seq(
-                        IRNode2T_stm(tbody->translate()),
+                        ttbody,
                         new T_seq(
                             new T_jump(NULL, new T_label("e")),
                             new T_seq(
                                 new T_label("f"),
-                                IRNode2T_stm(fbody->translate())
+                                ffbody
                             )
                         )
                     )
                 )
             ),
-            new T_label("e")
+            new T_eseq(
+                new T_label("e"),
+                new T_temp("ret")
+            )
         );
         return root;
     }
@@ -370,47 +431,42 @@ IRNode* A_letExp::translate(){
     if(decs == nullptr || body == nullptr)
         return NULL;
     
-    std::cout << "Let Start" << std::endl;
 
     T_stmList* decRoot = new T_stmList(NULL, NULL);
     T_stmList* decCurList = decRoot;
     A_decList* cur_dec = decs.get();
 
-    std::cout << "Dec Start" << std::endl;
-
     while (cur_dec != nullptr) {
         T_stm* cur_dect = IRNode2T_stm(cur_dec->head->translate());
-        if(cur_dect == NULL)
-            std::cout << "Let wrong!" << std::endl;
+        // if(cur_dect == NULL)
+        //     std::cout << "Let wrong!" << std::endl;
         decCurList->head.reset(cur_dect);
         decCurList->tail.reset(new T_stmList(NULL, NULL));
         decCurList = decCurList->tail.get();
         cur_dec = cur_dec->tail.get();
     }
 
-    std::cout << "Exp Start" << std::endl;
-
     T_expList* expRoot = new T_expList(NULL, NULL);
     T_expList* expCurList = expRoot;
     A_expList* cur_exp = body.get();
     while (cur_exp != nullptr) {
         T_exp* cur_expt = IRnode2T_exp(cur_exp->head->translate());
-        if(cur_expt == NULL)
-            std::cout << "Let wrong!" << std::endl;
-        
+        // if(cur_expt == NULL)
+        //     std::cout << "Let wrong!" << std::endl;      
         expCurList->head.reset(cur_expt);
         expCurList->tail.reset(new T_expList(NULL, NULL));
         expCurList = expCurList->tail.get();
         cur_exp = cur_exp->tail.get();
     }
 
-    std::cout << "Exp Finish" << std::endl;
+    decRoot->check();
+    expRoot->check();
 
     T_eseq* root = new T_eseq(
         decRoot,
         expRoot
     );
-    std::cout << "Let Finish" << std::endl;
+
     return root;
 }
 
@@ -434,10 +490,21 @@ IRNode* A_typeDec::translate(){
 IRNode* A_functionDec::translate(){
     if(body == nullptr)
         return NULL;
+    fcc.openFrame();
     // 应该进入新的环境以及保护变量
+    A_fieldList* cur_param = params.get();
+    while(cur_param != nullptr){
+        if(cur_param->head != nullptr)
+            fcc.addparams(cur_param->head->id);
+        cur_param = cur_param->tail.get();
+    }
     T_eseq* root = new T_eseq(
-        NULL, NULL
+        new T_seq(
+            NULL, IRNode2T_stm(new T_name(id))
+        ),
+        IRnode2T_exp(body->translate())
     );
+    fcc.closeFrame();
     return root;
 }
 
@@ -470,6 +537,7 @@ IRNode* A_expList::translate(){
         expCurList = expCurList->tail.get();
         cur_exp = cur_exp->tail.get();
     }
+    expRoot->check();
 
     return expRoot;
 }

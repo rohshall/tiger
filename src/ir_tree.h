@@ -166,6 +166,7 @@ struct T_expList : T_exp{
   std::unique_ptr<T_expList> tail;
   T_expList(T_exp* _head, T_expList* _tail);
   void printirt() override;
+  void check();
 };
 
 struct T_stmList : T_stm{
@@ -173,6 +174,7 @@ struct T_stmList : T_stm{
   std::unique_ptr<T_stmList> tail;
   T_stmList(T_stm* _head, T_stmList* _tail);
   void printirt() override;
+  void check();
 };
 
 
