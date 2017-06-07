@@ -1,5 +1,4 @@
 #include "frame.h"
-#include <iostream>
 
 Frame::Frame(int id) {
     frameID = id;
@@ -81,6 +80,24 @@ int FrameControl::getLocalVar(std::string id){
     return Frames[currentFrame-1].getLocalVar(id);
 }
 
+// int FrameControl::addLocalArr(std::string id, const int size){
+//     for(int ri = 0; ri < size; ri++)
+//         Frames[currentFrame-1].addLocalVar(id + "[" + std::to_string(ri) + "]");
+//     return Frames[currentFrame-1].getLocalVar(id + "[" + std::to_string(0) + "]");
+// }
+
+// int FrameControl::getLocalArr(std::string id, const int index){
+//     return Frames[currentFrame-1].getLocalVar(id + "[" + std::to_string(index) + "]");
+// }
+
+// int FrameControl::addLocalRecord(std::string id, std::string subId){
+//     return Frames[currentFrame-1].addLocalVar(id + "." + subId);
+// }
+
+// int FrameControl::getLocalRecord(std::string id, std::string subId){
+//     return Frames[currentFrame-1].getLocalVar(id + "." + subId);
+// }
+
 int FrameControl::addparams(std::string id){
     return Frames[currentFrame-1].addparams(id);
 }
@@ -157,9 +174,16 @@ T_mem* FrameControl::MEM(std::string id, int cur, T_exp* subTemp){
             )
         );
         root = MEM(id, ret, root);
-        return root;
     }
     else{
         return NULL;
     }
 }
+
+// T_mem* FrameControl::MEM(std::string id, const int index){
+//     return MEM(id + "[" + std::to_string(index), -1, NULL);
+// }
+// T_mem* FrameControl::MEM(std::string id, const std::string subID){
+//     return MEM(id + "." + subID, -1, NULL);
+// }
+

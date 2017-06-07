@@ -45,6 +45,10 @@ public:
     int getparams(std::string id);
     int addLocalVar(std::string id);
     int getLocalVar(std::string id);
+    // int addLocalArr(std::string id, const int size);
+    // int getLocalArr(std::string id, const int index);
+    // int addLocalRecord(std::string id, std::string subId);
+    // int getLocalRecord(std::string id, std::string subId);
 
     void openFrame();
     void closeFrame();
@@ -53,6 +57,8 @@ public:
 
     std::string MEM(std::string id,int cur = -1, std::string substring = std::string("TEMP(fp)"));
     T_mem* MEM(std::string id, int cur = -1, T_exp* subTemp = NULL);
+    // T_mem* MEM(std::string id, const int index = 0);
+    // T_mem* MEM(std::string id, const std::string subID);
 };
 
 #endif
