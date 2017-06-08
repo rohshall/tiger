@@ -19,3 +19,10 @@ The details of cat's semantic checking are different from that of tiger.
 
 1. var/type/function name can't be the same.
 2. code can't define function recursively.
+
+## Graphviz
+
+* Before you want to see the output graph you have to install graphviz
+* In linux you can use `sudo apt-get install graphviz` to easily install graphviz.
+* You can use `dot -Tjpg [filename] -o[outputfilename]` to get the ans jpg.
+* Ex. `dot -Tjpg irt.dot -oirt.jpg`

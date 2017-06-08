@@ -473,13 +473,11 @@ IRNode* A_letExp::translate(){
 IRNode* A_varDec::translate(){
     if(init == nullptr)
         return NULL;
-    std::cout << "varDec Start" << std::endl;
     fcc.addLocalVar(id);
     T_move* root = new T_move(
         fcc.MEM(id, -1, NULL),
         IRnode2T_exp(init->translate())
     );
-    std::cout << "varDec Finsh" << std::endl;
     return root;
 }
 

@@ -28,10 +28,16 @@ void cat_driver::translate() {
 }
 
 void cat_driver::printirt(){
+  // switch(irt->nodeKind){
+  //   case IRNode::NodeKind::T_exp : IRnode2T_exp(irt)->printirt(); break;
+  //   case IRNode::NodeKind::T_stm : IRNode2T_stm(irt)->printirt(); break;
+  // }
+  openFile();
   switch(irt->nodeKind){
-    case IRNode::NodeKind::T_exp : IRnode2T_exp(irt)->printirt(); break;
-    case IRNode::NodeKind::T_stm : IRNode2T_stm(irt)->printirt(); break;
+    case IRNode::NodeKind::T_exp : std::cout << IRnode2T_exp(irt)->printirtDot() << std::endl; break;
+    case IRNode::NodeKind::T_stm : std::cout << IRNode2T_stm(irt)->printirtDot() << std::endl; break;
   }
+  closeFile();
 }
 
 void cat_driver::error(const yy::location& loc, const std::string& msg) {

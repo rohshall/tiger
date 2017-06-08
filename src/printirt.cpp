@@ -243,16 +243,16 @@ void T_exp_stm::printirt(){
     stm->printirt();
 } 
 
-void T_expList::check(){
-    if(tail != nullptr)
-        tail->check();
+// void T_expList::check(){
+//     if(tail != nullptr)
+//         tail->check();
     
-    if(tail == nullptr)
-        return;
+//     if(tail == nullptr)
+//         return;
     
-    if(tail->head == nullptr && tail->tail == nullptr)
-        tail.reset(nullptr);
-}
+//     if(tail->head == nullptr && tail->tail == nullptr)
+//         tail.reset(nullptr);
+// }
 
 void T_expList::printirt(){
     print("T_EXPLIST(");
@@ -268,16 +268,16 @@ void T_expList::printirt(){
     print(")");
 }
 
-void T_stmList::check(){
-    if(tail != nullptr)
-        tail->check();
+// void T_stmList::check(){
+//     if(tail != nullptr)
+//         tail->check();
     
-    if(tail == nullptr)
-        return;
+//     if(tail == nullptr)
+//         return;
 
-    if(tail->head == nullptr && tail->tail == nullptr)
-        tail.reset(nullptr);    // auto delete, release do not delete the pointer
-}
+//     if(tail->head == nullptr && tail->tail == nullptr)
+//         tail.reset(nullptr);    // auto delete, release do not delete the pointer
+// }
 
 void T_stmList::printirt(){
     print("T_STMLIST(");
