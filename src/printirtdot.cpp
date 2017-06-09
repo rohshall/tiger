@@ -85,6 +85,7 @@ int printRelOpDot(T_relOp op){
         case T_relOp::T_le : return printSingle("LE");
         case T_relOp::T_lt : return printSingle("LT");
         case T_relOp::T_ne : return printSingle("NE");
+        default : return -1;
     }
 }
 
@@ -94,6 +95,10 @@ int printBinOpDot(T_binOp op){
         case T_binOp::T_minus : return printSingle("MINUS");
         case T_binOp::T_mul : return printSingle("MUL");
         case T_binOp::T_div : return printSingle("DIV");
+        case T_binOp::T_and : return printSingle("AND");
+        case T_binOp::T_or : return printSingle("OR");
+        case T_binOp::T_xor : return printSingle("XOR");
+        default : return -1;
     }
 }
 
